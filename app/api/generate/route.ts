@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { OUTFITS, SCENES, POSES, getRandomOutfit, getRandomScene, getRandomPoses } from '@/lib/data';
 import { buildPromptsForGeneration } from '@/lib/buildPrompt';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 interface GenerateRequest {
   name: string;
