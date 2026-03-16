@@ -49,20 +49,20 @@ export default function ImageGrid({ images, caption }: ImageGridProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Your Flex Photos</h2>
+        <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-magenta-500 uppercase tracking-wider">FLEX RESULTS</h2>
       </div>
 
       <div className="space-y-4">
         {images.map((image, index) => (
           <div
             key={index}
-            className={`relative rounded-lg overflow-hidden cursor-pointer transition-all ${
-              expandedIndex === index ? 'ring-2 ring-yellow-500' : 'hover:ring-2 hover:ring-yellow-500'
+            className={`relative rounded-lg overflow-hidden cursor-pointer transition-all border-2 ${
+              expandedIndex === index ? 'border-magenta-400 shadow-lg shadow-magenta-500/50' : 'border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-500/30'
             }`}
             onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
           >
             {/* Image Container */}
-            <div className={`relative bg-gray-100 ${expandedIndex === index ? 'max-h-none' : 'max-h-96'}`}>
+            <div className={`relative bg-black ${expandedIndex === index ? 'max-h-none' : 'max-h-96'}`}>
               <img
                 src={`data:image/png;base64,${image}`}
                 alt={`Flex photo ${index + 1}`}
@@ -70,39 +70,39 @@ export default function ImageGrid({ images, caption }: ImageGridProps) {
               />
 
               {/* Overlay with buttons */}
-              <div className="absolute inset-0 bg-gray-900 bg-opacity-0 hover:bg-opacity-60 flex items-center justify-center gap-4 transition-all opacity-0 hover:opacity-100">
+              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-70 flex items-center justify-center gap-4 transition-all opacity-0 hover:opacity-100">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     downloadImage(image, index);
                   }}
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-6 py-3 rounded-lg transition-colors"
+                  className="bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-black font-bold px-6 py-3 rounded-lg transition-all shadow-lg shadow-cyan-500/50"
                 >
-                  Download
+                  DOWNLOAD
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     shareImage(image, index);
                   }}
-                  className="bg-gray-700 hover:bg-gray-800 text-white font-bold px-6 py-3 rounded-lg transition-colors"
+                  className="bg-gradient-to-r from-magenta-600 to-magenta-500 hover:from-magenta-500 hover:to-magenta-400 text-black font-bold px-6 py-3 rounded-lg transition-all shadow-lg shadow-magenta-500/50"
                 >
-                  Share
+                  SHARE
                 </button>
               </div>
             </div>
 
             {/* Counter */}
-            <div className="absolute top-4 right-4 bg-gray-900 bg-opacity-80 text-yellow-400 px-3 py-1 rounded-full font-bold text-sm">
-              {index + 1}/3
+            <div className="absolute top-4 right-4 bg-black/80 border border-cyan-400 text-cyan-300 px-3 py-1 rounded-full font-mono font-bold text-sm">
+              [{index + 1}/3]
             </div>
           </div>
         ))}
       </div>
 
       {/* Caption */}
-      <div className="bg-gray-100 border border-gray-300 rounded-lg p-4">
-        <p className="text-gray-800 whitespace-pre-wrap text-sm">{caption}</p>
+      <div className="bg-black border-2 border-magenta-500/30 rounded-lg p-4 backdrop-blur">
+        <p className="text-magenta-300 whitespace-pre-wrap text-sm font-mono">{caption}</p>
       </div>
     </div>
   );

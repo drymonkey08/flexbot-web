@@ -27,6 +27,15 @@ export const OUTFITS: Record<string, string> = {
   trapstar_set: "Trapstar Irongate windbreaker jacket and matching windbreaker pants set (dark colors with metallic accents), New Balance 550 sneakers (classic grey/white/cream colorway), thick iced diamond Cuban link chain, fresh athletic luxury appearance, powerful relaxed posture",
   palm_fit: "Palm Angels black oversized track suit jacket and matching track pants with iconic white vertical stripe running down both outer sides, white Nike Air Force 1 sneakers, Cuban link chain, minimalist luxury aesthetic, confident athletic styling",
   off_white_fit: "Off-White diagonal stripe oversized hoodie or sweatshirt in black and white, orange-tag cargo pants (iconic Virgil design with orange security tag details), Off-White labeled sneakers or Jordan collaboration, visible gold jewelry, premium luxury aesthetic, distinctive recognizable styling",
+  tech_streetwear: "Black tech-fabric jacket with neon accent trim (electric blue or magenta), dark slim-fit cargo pants with hidden pockets and utility straps, high-tech sneakers with light-up elements, sleek minimal chain, cyber-futuristic aesthetic",
+  casual_luxury: "Oversized cream cashmere sweater with subtle luxury branding, tailored navy dress pants, pristine white leather low-top sneakers, simple gold watch, effortlessly refined sophisticated look",
+  athleisure_premium: "Premium grey athletic set - form-fitting long-sleeve shirt and matching joggers, white Air Max sneakers, minimal jewelry, sporty yet luxurious clean aesthetic",
+  streetwear_mixed: "Vintage band graphic tee tucked into black tailored trousers, oversized denim jacket with vintage patches, chunky white sneakers, layered gold chains, contemporary street style mixed with high fashion",
+  minimalist_black: "All-black monochrome fit - oversized black turtleneck, perfectly tailored black wool pants, black suede Chelsea boots, single understated gold piece, clean sophisticated elegance",
+  neon_tech: "Electric cyan tech shirt with black leather jacket and neon piping, black futuristic cargo pants, glow-effect sneakers, multiple tech-inspired accessories, cyberpunk street aesthetic",
+  high_fashion_casual: "Luxury designer oversized sweater in neutral tone with subtle monogram, perfectly fitting designer jeans, pristine designer white sneakers, minimal gold jewelry, high-fashion relaxed vibe",
+  streetwear_premium: "Oversized premium hoodie in earth tone, tailored trousers, premium retro basketball sneakers, thick gold rope chain, balanced street and luxury aesthetic",
+  tech_minimal: "Form-fitting technical black shirt with geometric patterns, slim black tech pants with zippered details, sleek minimalist black and silver sneakers, tech watch, futuristic minimal style",
 };
 
 export const SCENES: Record<string, { scene: string; light: string }> = {
@@ -122,6 +131,38 @@ export const SCENES: Record<string, { scene: string; light: string }> = {
     scene: "urban blacktop basketball court, chain-link fence, golden hour sunlight, street court atmosphere, ghetto fabulous setting",
     light: "warm golden hour sun creating long dramatic shadows across the court",
   },
+  office_boardroom: {
+    scene: "modern glass office boardroom, sleek white marble table, floor-to-ceiling windows, city skyline visible, minimalist luxury decor",
+    light: "natural daylight from windows mixed with warm office lighting, professional clean lighting",
+  },
+  gym_interior: {
+    scene: "upscale gym interior, mirrored walls, dumbbells and weights visible, modern gym equipment, polished floors, professional fitness environment",
+    light: "bright overhead gym lights with reflections in mirrors, sharp clear lighting",
+  },
+  coffee_shop: {
+    scene: "trendy modern coffee shop, exposed brick walls, wooden tables, vintage coffee machines visible, cozy urban cafe atmosphere",
+    light: "warm ambient cafe lighting with natural window light, cozy warm glow",
+  },
+  apartment_bedroom: {
+    scene: "luxury apartment bedroom, king-size bed with premium bedding, floor-to-ceiling windows, city view, minimalist decor, soft ambient lighting",
+    light: "soft warm bedroom lighting with natural light from windows, romantic ambient atmosphere",
+  },
+  street_walk: {
+    scene: "busy city street, pedestrians walking, storefront windows, urban street scene, daytime foot traffic, urban energy",
+    light: "bright daylight with natural shadows, urban street lighting, natural sunlight",
+  },
+  shopping_mall: {
+    scene: "upscale shopping mall interior, designer store fronts, polished floors, mall ambiance, luxury retail environment",
+    light: "bright mall lighting with warm accent lights, professional retail lighting",
+  },
+  home_office: {
+    scene: "modern home office, standing desk, computer setup, bookshelf, window with city view, tech-forward professional space",
+    light: "natural window light with desk lamp, professional home office lighting",
+  },
+  nighttime_street: {
+    scene: "nighttime city street with neon signs, street lights, urban nightlife atmosphere, people walking, vibrant night energy",
+    light: "neon street lights, artificial night lighting, colored neon signs reflecting",
+  },
 };
 
 export const POSES: Record<string, string> = {
@@ -154,6 +195,18 @@ export const POSES: Record<string, string> = {
   pool_edge: "POSE: Sitting on edge of infinity pool, both legs dangling in turquoise water feet submerged, one hand resting on pool deck behind for support, other hand holding enormous fanned spread of $100 bills fanned wide open toward camera, looking sideways at camera, sunglasses pushed up on head, relaxed expression, infinity pool edge dropping to ocean/city view behind, full body visible",
   balcony_fan: "POSE: Standing on balcony, fanning massive stack of $100 bills wide open like a deck of cards, cigarette smoke drifting, cool confident expression, city lights visible behind, full body visible",
   dual_hold: "POSE: Standing, holding both a massive cash brick and AK-47 both raised high, triumphant laugh expression, full body visible",
+  office_power: "POSE: Standing at desk, leaning back in power stance, one hand in pocket, other hand on desk, confident serious expression looking at camera, professional office attire, full body visible",
+  gym_post_workout: "POSE: Standing in gym with arms crossed, sweat visible, athletic confident expression, dumbbells visible in background, fitness environment, full body visible from torso up",
+  coffee_sip: "POSE: Sitting at cafe table holding premium coffee cup to lips, relaxed casual expression, elegant posture, cafe ambiance around, upper body visible",
+  phone_scroll: "POSE: Standing casually holding phone in one hand, other hand on hip, looking down at screen with subtle confident smirk, relaxed modern pose, full body visible",
+  window_gaze: "POSE: Looking out window thoughtfully with one hand on window frame, contemplative expression, natural light on face, elegant poised posture, upper body visible",
+  desk_lean: "POSE: Leaning against desk with arms crossed, confident relaxed expression, looking directly at camera, professional office setting, full body visible",
+  stairs_power: "POSE: Standing on stairs with one foot elevated on step above, looking upward with determined confident expression, ascending energy, full body visible",
+  lounge_recline: "POSE: Relaxing in luxury chair or sofa, leaning back comfortably, one arm over armrest, satisfied content expression, upscale interior, full upper body visible",
+  street_stride: "POSE: Walking with confident purposeful stride, looking forward, urban street setting, natural movement, full body visible, motion and energy",
+  shopping_flex: "POSE: In mall environment holding designer shopping bags in one hand, other hand on hip, satisfied confident smile, full body visible in retail setting",
+  thinking_pose: "POSE: Hand on chin in thoughtful pose, looking slightly to side, contemplative intelligent expression, clean neutral background, upper body visible",
+  standing_confident: "POSE: Standing with hands in pockets, relaxed powerful stance, direct eye contact with camera, subtle confident smile, clean professional appearance, full body visible",
 };
 
 export function getRandomOutfit(): string {

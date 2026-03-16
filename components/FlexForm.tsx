@@ -46,8 +46,8 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Figure / Name Input */}
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
-          Figure
+        <label className="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">
+          FIGURE NAME
         </label>
         <input
           type="text"
@@ -55,21 +55,21 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
           onChange={(e) => setName(e.target.value)}
           placeholder="Albert Einstein, Putin, Steph Curry..."
           required
-          className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-30"
+          className="w-full px-4 py-3 rounded-lg bg-black border-2 border-cyan-500/30 text-cyan-300 placeholder-cyan-500/40 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all"
         />
       </div>
 
       {/* Outfit Select */}
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
-          Outfit
+        <label className="block text-xs font-bold text-magenta-300 uppercase tracking-wider mb-2">
+          OUTFIT CHOICE
         </label>
         <select
           value={outfitKey}
           onChange={(e) => setOutfitKey(e.target.value)}
-          className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-30"
+          className="w-full px-4 py-3 rounded-lg bg-black border-2 border-magenta-500/30 text-magenta-300 focus:border-magenta-400 focus:outline-none focus:ring-2 focus:ring-magenta-500/20 transition-all"
         >
-          <option value="">Random</option>
+          <option value="">RANDOM</option>
           {Object.entries(OUTFITS).map(([key, _]) => (
             <option key={key} value={key}>
               {key.replace(/_/g, ' ').toUpperCase()}
@@ -80,15 +80,15 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
 
       {/* Scene Select */}
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
-          Scene
+        <label className="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">
+          SCENE ENVIRONMENT
         </label>
         <select
           value={sceneKey}
           onChange={(e) => setSceneKey(e.target.value)}
-          className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-30"
+          className="w-full px-4 py-3 rounded-lg bg-black border-2 border-cyan-500/30 text-cyan-300 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all"
         >
-          <option value="">Random</option>
+          <option value="">RANDOM</option>
           {Object.entries(SCENES).map(([key, _]) => (
             <option key={key} value={key}>
               {key.replace(/_/g, ' ').toUpperCase()}
@@ -99,15 +99,15 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
 
       {/* Pose Select */}
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
-          Pose
+        <label className="block text-xs font-bold text-magenta-300 uppercase tracking-wider mb-2">
+          POSE ACTION
         </label>
         <select
           value={poseKey}
           onChange={(e) => setPoseKey(e.target.value)}
-          className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-30"
+          className="w-full px-4 py-3 rounded-lg bg-black border-2 border-magenta-500/30 text-magenta-300 focus:border-magenta-400 focus:outline-none focus:ring-2 focus:ring-magenta-500/20 transition-all"
         >
-          <option value="">Random</option>
+          <option value="">RANDOM</option>
           {Object.entries(POSES).map(([key, _]) => (
             <option key={key} value={key}>
               {key.replace(/_/g, ' ').toUpperCase()}
@@ -121,17 +121,17 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
         <button
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-sm font-medium text-yellow-600 hover:text-yellow-700 transition-colors"
+          className="text-xs font-bold text-magenta-400 hover:text-magenta-300 transition-colors uppercase tracking-wider"
         >
-          {showAdvanced ? '▼ Advanced' : '▶ Advanced'}
+          {showAdvanced ? '▼ ADVANCED MODE' : '▶ ADVANCED MODE'}
         </button>
       </div>
 
       {/* Advanced Options */}
       {showAdvanced && (
-        <div className="space-y-4 bg-gray-100 p-4 rounded-lg border border-gray-300">
+        <div className="space-y-4 bg-black/50 p-4 rounded-lg border-2 border-magenta-500/30 backdrop-blur">
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
+            <label className="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">
               Custom Outfit
             </label>
             <textarea
@@ -139,12 +139,12 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
               onChange={(e) => setCustomOutfit(e.target.value)}
               placeholder="Describe your own outfit in detail..."
               rows={3}
-              className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-30"
+              className="w-full px-4 py-3 rounded-lg bg-black border-2 border-cyan-500/30 text-cyan-300 placeholder-cyan-500/40 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
+            <label className="block text-xs font-bold text-magenta-300 uppercase tracking-wider mb-2">
               Custom Pose
             </label>
             <textarea
@@ -152,12 +152,12 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
               onChange={(e) => setCustomPose(e.target.value)}
               placeholder="Describe your own pose in detail..."
               rows={3}
-              className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-30"
+              className="w-full px-4 py-3 rounded-lg bg-black border-2 border-magenta-500/30 text-magenta-300 placeholder-magenta-500/40 focus:border-magenta-400 focus:outline-none focus:ring-2 focus:ring-magenta-500/20 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
+            <label className="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">
               Full Custom Prompt
             </label>
             <textarea
@@ -165,7 +165,7 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
               onChange={(e) => setCustomPrompt(e.target.value)}
               placeholder="Write a full custom prompt — bypasses all dropdowns..."
               rows={5}
-              className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-30"
+              className="w-full px-4 py-3 rounded-lg bg-black border-2 border-cyan-500/30 text-cyan-300 placeholder-cyan-500/40 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all"
             />
           </div>
         </div>
@@ -175,9 +175,9 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
       <button
         type="submit"
         disabled={isLoading || !name.trim()}
-        className="w-full px-6 py-4 rounded-lg bg-yellow-600 text-white font-bold text-lg hover:bg-yellow-700 disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed transition-colors"
+        className="w-full px-6 py-4 rounded-lg bg-gradient-to-r from-cyan-600 to-magenta-600 hover:from-cyan-500 hover:to-magenta-500 text-white font-bold text-lg disabled:from-gray-600 disabled:to-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-300 uppercase tracking-wider shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50"
       >
-        {isLoading ? `Generating ${progress}/3...` : 'Generate 3 Flex Photos'}
+        {isLoading ? `⚡ GENERATING ${progress}/3...` : '🚀 INITIATE FLEX PROTOCOL'}
       </button>
     </form>
   );
