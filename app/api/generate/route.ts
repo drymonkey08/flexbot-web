@@ -117,21 +117,17 @@ export async function POST(request: NextRequest) {
     // Build prompts
     const { prompts, caption } = buildPromptsForGeneration(name, outfit, sceneDesc, poses);
 
-    // Generate all 3 images
-    const images: string[] = [];
-
+    // Generate all 3 images in parallel (much faster!)
+    let images: string[] = [];
     try {
-      console.log('Generating image 1/3...');
-      const img1 = await callGemini(prompts[0], apiKey);
-      images.push(img1);
-
-      console.log('Generating image 2/3...');
-      const img2 = await callGemini(prompts[1], apiKey);
-      images.push(img2);
-
-      console.log('Generating image 3/3...');
-      const img3 = await callGemini(prompts[2], apiKey);
-      images.push(img3);
+      console.log('Generating 3 images in parallel...');
+      const [img1, img2, img3] = await Promise.all([
+        callGemini(prompts[0], apiKey),
+        callGemini(prompts[1], apiKey),
+        callGemini(prompts[2], apiKey),
+      ]);
+      images = [img1, img2, img3];
+      console.log('All 3 images generated successfully');
     } catch (error) {
       console.error('Error generating images:', error);
       return NextResponse.json(
