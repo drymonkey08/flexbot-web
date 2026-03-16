@@ -48,9 +48,8 @@ export default function FallingMoney() {
 
     // Animation loop
     function animate() {
-      // Clear canvas with trail effect matching gray background
-      ctx!.fillStyle = 'rgba(245, 245, 245, 0.02)';
-      ctx!.fillRect(0, 0, canvas!.width, canvas!.height);
+      // Clear canvas completely (no trail)
+      ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
 
       // Draw and update money
       money.forEach((bill, index) => {
@@ -116,7 +115,7 @@ export default function FallingMoney() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-5"
+      className="fixed inset-0 pointer-events-none z-0"
       style={{ opacity: 1 }}
     />
   );

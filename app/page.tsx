@@ -68,7 +68,7 @@ export default function Home() {
       <FallingMoney />
 
       {/* Top Navigation */}
-      <nav className="bg-white border-b border-black sticky top-0 z-40">
+      <nav className="bg-white border-b border-black sticky top-0 z-50">
         <div className="flex justify-between items-center px-6 py-4">
           <div className="flex gap-6">
             <button className="text-xs font-bold uppercase tracking-widest hover:opacity-70 transition">CATALOG</button>
@@ -84,7 +84,7 @@ export default function Home() {
       </nav>
 
       {/* Main Content */}
-      <div className="flex">
+      <div className="flex relative z-10">
         {/* Left Sidebar - Navigation Dots & Thumbnails */}
         <div className="w-24 bg-white border-r border-black p-4 flex flex-col items-center gap-6">
           <div className="text-sm font-bold text-black">FLEXBOT</div>
