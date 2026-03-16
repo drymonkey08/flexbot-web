@@ -170,9 +170,11 @@ export default function Home() {
 
             {/* Right Sidebar - Form */}
             <div className="col-span-5 sticky top-28">
-              <div className="bg-white border-2 border-black p-8">
-                <h2 className="text-lg font-black uppercase tracking-wider mb-1">GENERATE</h2>
-                <p className="text-xs text-gray-600 font-mono mb-6">Enter figure name</p>
+              <div className="bg-white border-3 border-black p-8 shadow-lg hover:shadow-xl transition-shadow">
+                <div className="mb-8 pb-6 border-b-2 border-black">
+                  <h2 className="text-2xl font-black uppercase tracking-wider mb-1">GENERATE</h2>
+                  <p className="text-xs text-gray-700 font-mono">AI FLEX GENERATOR</p>
+                </div>
 
                 <FlexForm onGenerate={handleGenerate} isLoading={isLoading} progress={progress} />
 

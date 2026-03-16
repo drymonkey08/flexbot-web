@@ -12,11 +12,9 @@ export default function FallingMoney() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Money bills array
     const money: Array<{
       x: number;
       y: number;
@@ -24,77 +22,111 @@ export default function FallingMoney() {
       vy: number;
       rotation: number;
       vr: number;
-      size: number;
+      width: number;
+      height: number;
       opacity: number;
     }> = [];
 
-    // Create initial money bills
     function createMoney() {
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 5; i++) {
         money.push({
           x: Math.random() * canvas!.width,
           y: Math.random() * canvas!.height - canvas!.height,
-          vx: (Math.random() - 0.5) * 2,
-          vy: Math.random() * 1.5 + 0.8,
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: Math.random() * 1.2 + 0.6,
           rotation: Math.random() * Math.PI * 2,
-          vr: (Math.random() - 0.5) * 0.08,
-          size: Math.random() * 12 + 18,
-          opacity: Math.random() * 0.4 + 0.35,
+          vr: (Math.random() - 0.5) * 0.05,
+          width: 80,
+          height: 40,
+          opacity: Math.random() * 0.5 + 0.4,
         });
       }
     }
 
     createMoney();
 
-    // Animation loop
+    function drawRealisticBill(bill: typeof money[0]) {
+      ctx!.save();
+      ctx!.globalAlpha = bill.opacity;
+      ctx!.translate(bill.x, bill.y);
+      ctx!.rotate(bill.rotation);
+
+      // Background gradient (realistic green)
+      const gradient = ctx!.createLinearGradient(-bill.width / 2, -bill.height / 2, -bill.width / 2, bill.height / 2);
+      gradient.addColorStop(0, '#1b5e20');
+      gradient.addColorStop(0.5, '#2e7d32');
+      gradient.addColorStop(1, '#1b5e20');
+
+      ctx!.fillStyle = gradient;
+      ctx!.fillRect(-bill.width / 2, -bill.height / 2, bill.width, bill.height);
+
+      // Border
+      ctx!.strokeStyle = '#0d3d1a';
+      ctx!.lineWidth = 1.5;
+      ctx!.strokeRect(-bill.width / 2, -bill.height / 2, bill.width, bill.height);
+
+      // Inner decorative border
+      ctx!.strokeStyle = '#558b2f';
+      ctx!.lineWidth = 0.5;
+      ctx!.strokeRect(-bill.width / 2 + 3, -bill.height / 2 + 3, bill.width - 6, bill.height - 6);
+
+      // Large "100" text on left
+      ctx!.fillStyle = '#ffffff';
+      ctx!.font = `bold ${bill.width * 0.35}px Arial`;
+      ctx!.textAlign = 'center';
+      ctx!.textBaseline = 'middle';
+      ctx!.fillText('100', -bill.width * 0.35, -bill.height * 0.1);
+
+      // "UNITED STATES OF AMERICA" text
+      ctx!.fillStyle = '#ffffff';
+      ctx!.font = `bold ${bill.width * 0.08}px Arial`;
+      ctx!.textAlign = 'center';
+      ctx!.fillText('USA', 0, 0);
+
+      // Serial-like numbers
+      ctx!.fillStyle = '#ffffff';
+      ctx!.font = `${bill.width * 0.06}px monospace`;
+      ctx!.textAlign = 'left';
+      ctx!.fillText('A 123456789 B', -bill.width * 0.45, -bill.height * 0.35);
+      ctx!.fillText('A 123456789 B', -bill.width * 0.45, bill.height * 0.35);
+
+      // Corner "100" numbers
+      ctx!.font = `bold ${bill.width * 0.12}px Arial`;
+      ctx!.textAlign = 'center';
+      ctx!.textBaseline = 'middle';
+
+      ctx!.fillText('100', -bill.width * 0.38, -bill.height * 0.35);
+      ctx!.fillText('100', bill.width * 0.38, bill.height * 0.35);
+
+      // Decorative pattern (small squares)
+      ctx!.fillStyle = '#ffffff';
+      ctx!.globalAlpha = bill.opacity * 0.3;
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 2; j++) {
+          ctx!.fillRect(-bill.width * 0.4 + i * 20, -bill.height * 0.3 + j * 15, 6, 6);
+        }
+      }
+
+      ctx!.restore();
+    }
+
     function animate() {
-      // Clear canvas completely (no trail)
       ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
 
-      // Draw and update money
       money.forEach((bill, index) => {
-        // Update position
         bill.x += bill.vx;
         bill.y += bill.vy;
         bill.rotation += bill.vr;
 
-        // Fade out at bottom
-        if (bill.y > canvas!.height) {
+        if (bill.y > canvas!.height + 50) {
           money.splice(index, 1);
-          if (money.length < 8) {
+          if (money.length < 5) {
             createMoney();
           }
           return;
         }
 
-        // Draw money bill
-        ctx!.save();
-        ctx!.globalAlpha = bill.opacity;
-        ctx!.translate(bill.x, bill.y);
-        ctx!.rotate(bill.rotation);
-
-        // Draw bill background (green)
-        ctx!.fillStyle = '#22C55E';
-        ctx!.fillRect(-bill.size / 2, -bill.size / 4, bill.size, bill.size / 2);
-
-        // Draw border
-        ctx!.strokeStyle = '#16A34A';
-        ctx!.lineWidth = 1;
-        ctx!.strokeRect(-bill.size / 2, -bill.size / 4, bill.size, bill.size / 2);
-
-        // Draw dollar sign
-        ctx!.fillStyle = '#FFFFFF';
-        ctx!.font = `bold ${bill.size * 0.4}px Arial`;
-        ctx!.textAlign = 'center';
-        ctx!.textBaseline = 'middle';
-        ctx!.fillText('$', 0, 0);
-
-        // Draw corner numbers
-        ctx!.font = `${bill.size * 0.15}px Arial`;
-        ctx!.fillText('100', -bill.size * 0.35, -bill.size * 0.15);
-        ctx!.fillText('100', bill.size * 0.35, bill.size * 0.15);
-
-        ctx!.restore();
+        drawRealisticBill(bill);
       });
 
       requestAnimationFrame(animate);
@@ -102,7 +134,6 @@ export default function FallingMoney() {
 
     animate();
 
-    // Handle window resize
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
