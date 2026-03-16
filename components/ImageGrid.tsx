@@ -49,7 +49,7 @@ export default function ImageGrid({ images, caption }: ImageGridProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-yellow-500">Your Flex Photos</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Your Flex Photos</h2>
       </div>
 
       <div className="space-y-4">
@@ -62,7 +62,7 @@ export default function ImageGrid({ images, caption }: ImageGridProps) {
             onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
           >
             {/* Image Container */}
-            <div className={`relative bg-gray-900 ${expandedIndex === index ? 'max-h-none' : 'max-h-96'}`}>
+            <div className={`relative bg-gray-100 ${expandedIndex === index ? 'max-h-none' : 'max-h-96'}`}>
               <img
                 src={`data:image/png;base64,${image}`}
                 alt={`Flex photo ${index + 1}`}
@@ -70,13 +70,13 @@ export default function ImageGrid({ images, caption }: ImageGridProps) {
               />
 
               {/* Overlay with buttons */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 flex items-center justify-center gap-4 transition-all opacity-0 hover:opacity-100">
+              <div className="absolute inset-0 bg-gray-900 bg-opacity-0 hover:bg-opacity-60 flex items-center justify-center gap-4 transition-all opacity-0 hover:opacity-100">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     downloadImage(image, index);
                   }}
-                  className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 py-3 rounded-lg transition-colors"
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-6 py-3 rounded-lg transition-colors"
                 >
                   Download
                 </button>
@@ -85,7 +85,7 @@ export default function ImageGrid({ images, caption }: ImageGridProps) {
                     e.stopPropagation();
                     shareImage(image, index);
                   }}
-                  className="bg-blue-500 hover:bg-blue-400 text-white font-bold px-6 py-3 rounded-lg transition-colors"
+                  className="bg-gray-700 hover:bg-gray-800 text-white font-bold px-6 py-3 rounded-lg transition-colors"
                 >
                   Share
                 </button>
@@ -93,7 +93,7 @@ export default function ImageGrid({ images, caption }: ImageGridProps) {
             </div>
 
             {/* Counter */}
-            <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-yellow-500 px-3 py-1 rounded-full font-bold">
+            <div className="absolute top-4 right-4 bg-gray-900 bg-opacity-80 text-yellow-400 px-3 py-1 rounded-full font-bold text-sm">
               {index + 1}/3
             </div>
           </div>
@@ -101,8 +101,8 @@ export default function ImageGrid({ images, caption }: ImageGridProps) {
       </div>
 
       {/* Caption */}
-      <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
-        <p className="text-gray-300 whitespace-pre-wrap">{caption}</p>
+      <div className="bg-gray-100 border border-gray-300 rounded-lg p-4">
+        <p className="text-gray-800 whitespace-pre-wrap text-sm">{caption}</p>
       </div>
     </div>
   );
