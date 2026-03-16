@@ -15,123 +15,156 @@ export default function FallingMoney() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const money: Array<{
+    interface Bill {
       x: number;
       y: number;
       vx: number;
       vy: number;
       rotation: number;
-      vr: number;
+      rotationSpeed: number;
+      wobbleAmount: number;
+      wobbleSpeed: number;
+      wobbleOffset: number;
       width: number;
       height: number;
       opacity: number;
-    }> = [];
-
-    function createMoney() {
-      for (let i = 0; i < 4; i++) {
-        money.push({
-          x: Math.random() * canvas!.width,
-          y: Math.random() * canvas!.height - canvas!.height * 1.2,
-          vx: (Math.random() - 0.5) * 1.2,
-          vy: Math.random() * 0.8 + 0.5,
-          rotation: Math.random() * Math.PI * 2,
-          vr: (Math.random() - 0.5) * 0.04,
-          width: 120,
-          height: 60,
-          opacity: Math.random() * 0.6 + 0.35,
-        });
-      }
+      time: number;
     }
 
-    createMoney();
+    const bills: Bill[] = [];
 
-    function drawRealisticBill(bill: typeof money[0]) {
+    function createBill(): Bill {
+      return {
+        x: Math.random() * canvas!.width,
+        y: -100,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: Math.random() * 0.5 + 0.3,
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.08,
+        wobbleAmount: Math.random() * 2 + 1,
+        wobbleSpeed: Math.random() * 0.04 + 0.02,
+        wobbleOffset: Math.random() * Math.PI * 2,
+        width: 160,
+        height: 80,
+        opacity: 0.85,
+        time: 0,
+      };
+    }
+
+    // Create initial bills
+    for (let i = 0; i < 3; i++) {
+      bills.push(createBill());
+    }
+
+    function drawBill(bill: Bill) {
       ctx!.save();
       ctx!.globalAlpha = bill.opacity;
       ctx!.translate(bill.x, bill.y);
       ctx!.rotate(bill.rotation);
 
-      // Main bill background - realistic green gradient
-      const gradient = ctx!.createLinearGradient(-bill.width / 2, -bill.height / 2, -bill.width / 2, bill.height / 2);
-      gradient.addColorStop(0, '#1a5f2c');
+      // Main background - realistic green
+      const gradient = ctx!.createLinearGradient(
+        -bill.width / 2,
+        -bill.height / 2,
+        -bill.width / 2,
+        bill.height / 2
+      );
+      gradient.addColorStop(0, '#0d5d2f');
       gradient.addColorStop(0.5, '#2d8659');
-      gradient.addColorStop(1, '#1a5f2c');
+      gradient.addColorStop(1, '#0d5d2f');
 
       ctx!.fillStyle = gradient;
       ctx!.fillRect(-bill.width / 2, -bill.height / 2, bill.width, bill.height);
 
-      // Dark border
-      ctx!.strokeStyle = '#0d3d1a';
-      ctx!.lineWidth = 2;
+      // Outer border
+      ctx!.strokeStyle = '#053d19';
+      ctx!.lineWidth = 3;
       ctx!.strokeRect(-bill.width / 2, -bill.height / 2, bill.width, bill.height);
 
-      // Inner decorative border (gold/tan)
-      ctx!.strokeStyle = '#b8860b';
-      ctx!.lineWidth = 1;
-      ctx!.strokeRect(-bill.width / 2 + 5, -bill.height / 2 + 5, bill.width - 10, bill.height - 10);
+      // Inner gold border
+      ctx!.strokeStyle = '#c9a961';
+      ctx!.lineWidth = 1.5;
+      ctx!.strokeRect(
+        -bill.width / 2 + 6,
+        -bill.height / 2 + 6,
+        bill.width - 12,
+        bill.height - 12
+      );
 
-      // Left side - Large "100"
+      // Large "100" on left side
       ctx!.fillStyle = '#ffffff';
-      ctx!.font = `bold ${bill.width * 0.35}px Arial`;
+      ctx!.font = `bold ${bill.width * 0.32}px 'Arial Black'`;
       ctx!.textAlign = 'center';
       ctx!.textBaseline = 'middle';
-      ctx!.fillText('100', -bill.width * 0.38, 0);
+      ctx!.fillText('100', -bill.width * 0.35, 0);
 
-      // Right side - Large "100"
-      ctx!.fillText('100', bill.width * 0.38, 0);
+      // Large "100" on right side
+      ctx!.fillText('100', bill.width * 0.35, 0);
 
-      // Center - "UNITED STATES OF AMERICA"
+      // Center text - "UNITED STATES OF AMERICA"
       ctx!.fillStyle = '#ffffff';
-      ctx!.font = `bold ${bill.width * 0.09}px Arial`;
+      ctx!.font = `bold ${bill.width * 0.11}px Arial`;
       ctx!.textAlign = 'center';
-      ctx!.fillText('UNITED STATES', 0, -bill.height * 0.15);
-      ctx!.font = `bold ${bill.width * 0.08}px Arial`;
-      ctx!.fillText('OF AMERICA', 0, bill.height * 0.08);
+      ctx!.fillText('UNITED STATES', 0, -bill.height * 0.18);
+      ctx!.font = `bold ${bill.width * 0.1}px Arial`;
+      ctx!.fillText('OF AMERICA', 0, bill.height * 0.05);
 
       // "ONE HUNDRED DOLLARS"
       ctx!.fillStyle = '#ffffff';
-      ctx!.font = `${bill.width * 0.07}px Arial`;
-      ctx!.fillText('ONE HUNDRED DOLLARS', 0, bill.height * 0.25);
+      ctx!.font = `${bill.width * 0.075}px Arial`;
+      ctx!.fillText('ONE HUNDRED DOLLARS', 0, bill.height * 0.28);
 
-      // Top left - small serial numbers
+      // Serial numbers - top left
       ctx!.fillStyle = '#ffffff';
-      ctx!.font = `${bill.width * 0.055}px monospace`;
+      ctx!.font = `${bill.width * 0.06}px 'Courier New'`;
       ctx!.textAlign = 'left';
-      ctx!.fillText('A 12345678 B', -bill.width * 0.45, -bill.height * 0.38);
-      ctx!.fillText('Series 2023', -bill.width * 0.45, bill.height * 0.38);
+      ctx!.fillText('A 12345678 B', -bill.width * 0.47, -bill.height * 0.36);
 
-      // Top right - small serial numbers
+      // Serial numbers - top right
       ctx!.textAlign = 'right';
-      ctx!.fillText('A 12345678 B', bill.width * 0.45, -bill.height * 0.38);
-      ctx!.fillText('Federal Reserve', bill.width * 0.45, bill.height * 0.38);
+      ctx!.fillText('A 12345678 B', bill.width * 0.47, -bill.height * 0.36);
 
-      // Corner circles (representing Federal Reserve seal style)
+      // Series year
+      ctx!.textAlign = 'left';
+      ctx!.font = `${bill.width * 0.055}px Arial`;
+      ctx!.fillText('Series 2023', -bill.width * 0.47, bill.height * 0.36);
+
+      // Federal Reserve
+      ctx!.textAlign = 'right';
+      ctx!.fillText('Federal Reserve', bill.width * 0.47, bill.height * 0.36);
+
+      // Decorative corner seals
       ctx!.strokeStyle = '#ffffff';
       ctx!.lineWidth = 1.5;
       ctx!.beginPath();
-      ctx!.arc(-bill.width * 0.4, -bill.height * 0.35, 5, 0, Math.PI * 2);
+      ctx!.arc(-bill.width * 0.42, -bill.height * 0.35, 6, 0, Math.PI * 2);
       ctx!.stroke();
 
       ctx!.beginPath();
-      ctx!.arc(bill.width * 0.4, bill.height * 0.35, 5, 0, Math.PI * 2);
+      ctx!.arc(bill.width * 0.42, bill.height * 0.35, 6, 0, Math.PI * 2);
       ctx!.stroke();
 
-      // Security features - vertical line pattern
+      // Security feature - fine lines
       ctx!.strokeStyle = '#ffffff';
-      ctx!.globalAlpha = bill.opacity * 0.4;
       ctx!.lineWidth = 0.5;
-      for (let i = 0; i < 8; i++) {
-        const x = -bill.width * 0.4 + i * 12;
+      ctx!.globalAlpha = bill.opacity * 0.5;
+      for (let i = 0; i < 10; i++) {
+        const x = -bill.width * 0.45 + i * (bill.width * 0.09);
         ctx!.beginPath();
-        ctx!.moveTo(x, -bill.height * 0.25);
-        ctx!.lineTo(x, bill.height * 0.25);
+        ctx!.moveTo(x, -bill.height * 0.2);
+        ctx!.lineTo(x, bill.height * 0.2);
         ctx!.stroke();
       }
 
-      // Benjamin Franklin representation (portrait area - light shading)
-      ctx!.globalAlpha = bill.opacity * 0.15;
+      // Portrait area shading
+      ctx!.globalAlpha = bill.opacity * 0.12;
       ctx!.fillStyle = '#ffffff';
-      ctx!.fillRect(-bill.width * 0.35, -bill.height * 0.2, bill.width * 0.15, bill.height * 0.4);
+      ctx!.fillRect(
+        -bill.width * 0.3,
+        -bill.height * 0.3,
+        bill.width * 0.12,
+        bill.height * 0.6
+      );
 
       ctx!.restore();
     }
@@ -139,21 +172,44 @@ export default function FallingMoney() {
     function animate() {
       ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
 
-      money.forEach((bill, index) => {
-        bill.x += bill.vx;
-        bill.y += bill.vy;
-        bill.rotation += bill.vr;
+      for (let i = bills.length - 1; i >= 0; i--) {
+        const bill = bills[i];
 
-        if (bill.y > canvas!.height + 100) {
-          money.splice(index, 1);
-          if (money.length < 4) {
-            createMoney();
-          }
-          return;
+        // Update position
+        bill.y += bill.vy;
+        bill.vy += 0.15; // gravity
+        bill.vy = Math.min(bill.vy, 3); // terminal velocity
+
+        // Wobble effect (side to side flutter)
+        bill.wobbleOffset += bill.wobbleSpeed;
+        bill.x += Math.sin(bill.wobbleOffset) * bill.wobbleAmount * 0.01;
+
+        // Rotation with flutter
+        bill.rotation += bill.rotationSpeed;
+        bill.rotationSpeed += (Math.random() - 0.5) * 0.01; // flutter effect
+        bill.rotationSpeed *= 0.98; // damping
+
+        // Keep x in bounds
+        if (bill.x < -50) bill.x = canvas!.width + 50;
+        if (bill.x > canvas!.width + 50) bill.x = -50;
+
+        // Fade in/out effect
+        if (bill.y < 100) {
+          bill.opacity = Math.min(0.85, bill.y / 100);
+        } else if (bill.y > canvas!.height - 100) {
+          bill.opacity = 0.85 * ((canvas!.height - bill.y) / 100);
+        } else {
+          bill.opacity = 0.85;
         }
 
-        drawRealisticBill(bill);
-      });
+        // Remove when fully off screen and not visible
+        if (bill.y > canvas!.height + 150) {
+          bills.splice(i, 1);
+          bills.push(createBill());
+        } else {
+          drawBill(bill);
+        }
+      }
 
       requestAnimationFrame(animate);
     }
