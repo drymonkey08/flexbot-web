@@ -28,17 +28,17 @@ export default function FallingMoney() {
     }> = [];
 
     function createMoney() {
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 4; i++) {
         money.push({
           x: Math.random() * canvas!.width,
-          y: Math.random() * canvas!.height - canvas!.height,
-          vx: (Math.random() - 0.5) * 1.5,
-          vy: Math.random() * 1.2 + 0.6,
+          y: Math.random() * canvas!.height - canvas!.height * 1.2,
+          vx: (Math.random() - 0.5) * 1.2,
+          vy: Math.random() * 0.8 + 0.5,
           rotation: Math.random() * Math.PI * 2,
-          vr: (Math.random() - 0.5) * 0.05,
-          width: 80,
-          height: 40,
-          opacity: Math.random() * 0.5 + 0.4,
+          vr: (Math.random() - 0.5) * 0.04,
+          width: 120,
+          height: 60,
+          opacity: Math.random() * 0.6 + 0.35,
         });
       }
     }
@@ -51,61 +51,87 @@ export default function FallingMoney() {
       ctx!.translate(bill.x, bill.y);
       ctx!.rotate(bill.rotation);
 
-      // Background gradient (realistic green)
+      // Main bill background - realistic green gradient
       const gradient = ctx!.createLinearGradient(-bill.width / 2, -bill.height / 2, -bill.width / 2, bill.height / 2);
-      gradient.addColorStop(0, '#1b5e20');
-      gradient.addColorStop(0.5, '#2e7d32');
-      gradient.addColorStop(1, '#1b5e20');
+      gradient.addColorStop(0, '#1a5f2c');
+      gradient.addColorStop(0.5, '#2d8659');
+      gradient.addColorStop(1, '#1a5f2c');
 
       ctx!.fillStyle = gradient;
       ctx!.fillRect(-bill.width / 2, -bill.height / 2, bill.width, bill.height);
 
-      // Border
+      // Dark border
       ctx!.strokeStyle = '#0d3d1a';
-      ctx!.lineWidth = 1.5;
+      ctx!.lineWidth = 2;
       ctx!.strokeRect(-bill.width / 2, -bill.height / 2, bill.width, bill.height);
 
-      // Inner decorative border
-      ctx!.strokeStyle = '#558b2f';
-      ctx!.lineWidth = 0.5;
-      ctx!.strokeRect(-bill.width / 2 + 3, -bill.height / 2 + 3, bill.width - 6, bill.height - 6);
+      // Inner decorative border (gold/tan)
+      ctx!.strokeStyle = '#b8860b';
+      ctx!.lineWidth = 1;
+      ctx!.strokeRect(-bill.width / 2 + 5, -bill.height / 2 + 5, bill.width - 10, bill.height - 10);
 
-      // Large "100" text on left
+      // Left side - Large "100"
       ctx!.fillStyle = '#ffffff';
       ctx!.font = `bold ${bill.width * 0.35}px Arial`;
       ctx!.textAlign = 'center';
       ctx!.textBaseline = 'middle';
-      ctx!.fillText('100', -bill.width * 0.35, -bill.height * 0.1);
+      ctx!.fillText('100', -bill.width * 0.38, 0);
 
-      // "UNITED STATES OF AMERICA" text
+      // Right side - Large "100"
+      ctx!.fillText('100', bill.width * 0.38, 0);
+
+      // Center - "UNITED STATES OF AMERICA"
       ctx!.fillStyle = '#ffffff';
+      ctx!.font = `bold ${bill.width * 0.09}px Arial`;
+      ctx!.textAlign = 'center';
+      ctx!.fillText('UNITED STATES', 0, -bill.height * 0.15);
       ctx!.font = `bold ${bill.width * 0.08}px Arial`;
-      ctx!.textAlign = 'center';
-      ctx!.fillText('USA', 0, 0);
+      ctx!.fillText('OF AMERICA', 0, bill.height * 0.08);
 
-      // Serial-like numbers
+      // "ONE HUNDRED DOLLARS"
       ctx!.fillStyle = '#ffffff';
-      ctx!.font = `${bill.width * 0.06}px monospace`;
+      ctx!.font = `${bill.width * 0.07}px Arial`;
+      ctx!.fillText('ONE HUNDRED DOLLARS', 0, bill.height * 0.25);
+
+      // Top left - small serial numbers
+      ctx!.fillStyle = '#ffffff';
+      ctx!.font = `${bill.width * 0.055}px monospace`;
       ctx!.textAlign = 'left';
-      ctx!.fillText('A 123456789 B', -bill.width * 0.45, -bill.height * 0.35);
-      ctx!.fillText('A 123456789 B', -bill.width * 0.45, bill.height * 0.35);
+      ctx!.fillText('A 12345678 B', -bill.width * 0.45, -bill.height * 0.38);
+      ctx!.fillText('Series 2023', -bill.width * 0.45, bill.height * 0.38);
 
-      // Corner "100" numbers
-      ctx!.font = `bold ${bill.width * 0.12}px Arial`;
-      ctx!.textAlign = 'center';
-      ctx!.textBaseline = 'middle';
+      // Top right - small serial numbers
+      ctx!.textAlign = 'right';
+      ctx!.fillText('A 12345678 B', bill.width * 0.45, -bill.height * 0.38);
+      ctx!.fillText('Federal Reserve', bill.width * 0.45, bill.height * 0.38);
 
-      ctx!.fillText('100', -bill.width * 0.38, -bill.height * 0.35);
-      ctx!.fillText('100', bill.width * 0.38, bill.height * 0.35);
+      // Corner circles (representing Federal Reserve seal style)
+      ctx!.strokeStyle = '#ffffff';
+      ctx!.lineWidth = 1.5;
+      ctx!.beginPath();
+      ctx!.arc(-bill.width * 0.4, -bill.height * 0.35, 5, 0, Math.PI * 2);
+      ctx!.stroke();
 
-      // Decorative pattern (small squares)
-      ctx!.fillStyle = '#ffffff';
-      ctx!.globalAlpha = bill.opacity * 0.3;
-      for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 2; j++) {
-          ctx!.fillRect(-bill.width * 0.4 + i * 20, -bill.height * 0.3 + j * 15, 6, 6);
-        }
+      ctx!.beginPath();
+      ctx!.arc(bill.width * 0.4, bill.height * 0.35, 5, 0, Math.PI * 2);
+      ctx!.stroke();
+
+      // Security features - vertical line pattern
+      ctx!.strokeStyle = '#ffffff';
+      ctx!.globalAlpha = bill.opacity * 0.4;
+      ctx!.lineWidth = 0.5;
+      for (let i = 0; i < 8; i++) {
+        const x = -bill.width * 0.4 + i * 12;
+        ctx!.beginPath();
+        ctx!.moveTo(x, -bill.height * 0.25);
+        ctx!.lineTo(x, bill.height * 0.25);
+        ctx!.stroke();
       }
+
+      // Benjamin Franklin representation (portrait area - light shading)
+      ctx!.globalAlpha = bill.opacity * 0.15;
+      ctx!.fillStyle = '#ffffff';
+      ctx!.fillRect(-bill.width * 0.35, -bill.height * 0.2, bill.width * 0.15, bill.height * 0.4);
 
       ctx!.restore();
     }
@@ -118,9 +144,9 @@ export default function FallingMoney() {
         bill.y += bill.vy;
         bill.rotation += bill.vr;
 
-        if (bill.y > canvas!.height + 50) {
+        if (bill.y > canvas!.height + 100) {
           money.splice(index, 1);
-          if (money.length < 5) {
+          if (money.length < 4) {
             createMoney();
           }
           return;
