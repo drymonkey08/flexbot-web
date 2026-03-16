@@ -132,10 +132,10 @@ export default function Home() {
               <div className="aspect-[3/4] bg-gray-50 border border-gray-200 flex items-center justify-center rounded-2xl">
                 <div className="text-center px-8">
                   <div className="text-6xl sm:text-8xl mb-4">💰</div>
-                  <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] font-mono text-gray-400 mb-2">
+                  <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] font-mono text-black mb-2">
                     Awaiting Flex Generation
                   </p>
-                  <p className="text-[10px] text-gray-300 font-mono">
+                  <p className="text-[10px] text-black font-mono">
                     Results will materialize here
                   </p>
                 </div>
@@ -226,7 +226,7 @@ export default function Home() {
             Against the Ordinary
           </h1>
 
-          <p className="text-[10px] sm:text-xs text-gray-500 mt-4 max-w-sm leading-relaxed font-mono">
+          <p className="text-[10px] sm:text-xs text-gray-800 mt-4 max-w-sm leading-relaxed font-mono">
             ***When the moment calls for greatness......there&apos;s no room for
             compromise on style and presence.////
           </p>
@@ -302,7 +302,7 @@ export default function Home() {
           <div className="w-48 border-2 border-black bg-white p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-5 h-5 border border-black rounded-full flex items-center justify-center text-[8px]">✦</div>
-              <span className="text-[8px] font-mono text-gray-400">FLEXBOT</span>
+              <span className="text-[8px] font-mono text-black">FLEXBOT</span>
             </div>
             <p className="text-[10px] font-bold leading-tight">
               Unyielding<br />
@@ -321,7 +321,7 @@ export default function Home() {
               />
             ) : (
               <div className="h-full bg-gray-100 flex items-center justify-center p-4">
-                <p className="text-[10px] font-mono text-gray-400 text-center">Preview</p>
+                <p className="text-[10px] font-mono text-black text-center">Preview</p>
               </div>
             )}
           </div>
@@ -342,7 +342,7 @@ export default function Home() {
               <div className="flex justify-between items-center mb-8">
                 <div>
                   <h2 className="text-xl font-black uppercase tracking-wider">Generate</h2>
-                  <p className="text-[10px] text-gray-500 font-mono mt-1">AI FLEX GENERATOR</p>
+                  <p className="text-[10px] text-gray-800 font-mono mt-1">AI FLEX GENERATOR</p>
                 </div>
                 <button onClick={() => setShowForm(false)} className="text-2xl font-bold hover:opacity-60 transition">×</button>
               </div>
