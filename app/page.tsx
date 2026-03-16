@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import FlexForm from '@/components/FlexForm';
-import ImageGrid from '@/components/ImageGrid';
 import FallingMoney from '@/components/FallingMoney';
 
 interface GenerateResponse {
@@ -20,7 +19,6 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
   const [showContact, setShowContact] = useState(false);
-  const [showSystem, setShowSystem] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const handleGenerate = async (data: {
