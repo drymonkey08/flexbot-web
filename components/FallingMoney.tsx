@@ -29,270 +29,284 @@ export default function FallingMoney() {
     }
 
     const bills: Bill[] = [];
-    const BILL_W = 180;
-    const BILL_H = 76;
-    const MAX_BILLS = 12;
+    const BILL_W = 200;
+    const BILL_H = 84;
+    const MAX_BILLS = 15;
 
     function spawn(): Bill {
       return {
         x: Math.random() * canvas!.width,
-        y: -BILL_H * (1 + Math.random() * 2),
-        vy: 0.4 + Math.random() * 0.6,
-        rotation: (Math.random() - 0.5) * 0.6,
-        rotSpeed: (Math.random() - 0.5) * 0.02,
+        y: -BILL_H * (1 + Math.random() * 3),
+        vy: 1.2 + Math.random() * 1.5,
+        rotation: (Math.random() - 0.5) * 0.8,
+        rotSpeed: (Math.random() - 0.5) * 0.03,
         wobblePhase: Math.random() * Math.PI * 2,
-        wobbleAmp: 40 + Math.random() * 60,
-        wobbleFreq: 0.008 + Math.random() * 0.008,
-        scale: 0.7 + Math.random() * 0.4,
-        opacity: 0.75 + Math.random() * 0.2,
+        wobbleAmp: 30 + Math.random() * 50,
+        wobbleFreq: 0.015 + Math.random() * 0.015,
+        scale: 0.6 + Math.random() * 0.5,
+        opacity: 0.85 + Math.random() * 0.15,
         showFront: Math.random() > 0.3,
       };
     }
 
+    // Stagger initial bills across screen
     for (let i = 0; i < MAX_BILLS; i++) {
       const b = spawn();
-      b.y = Math.random() * canvas.height;
+      b.y = Math.random() * canvas.height * 1.5 - canvas.height * 0.3;
       bills.push(b);
     }
 
-    // ── draw the FRONT of a $100 bill ──
+    // ── FRONT of $100 ──
     function drawFront(w: number, h: number) {
-      // background
-      const g = ctx!.createLinearGradient(0, 0, w, h);
-      g.addColorStop(0, '#e8e4d4');
-      g.addColorStop(0.35, '#f0ece0');
-      g.addColorStop(0.65, '#e2ddd0');
-      g.addColorStop(1, '#d8d4c4');
-      ctx!.fillStyle = g;
+      // Cream/tan paper background (like real bill)
+      const bg = ctx!.createLinearGradient(0, 0, w, h);
+      bg.addColorStop(0, '#ede8d5');
+      bg.addColorStop(0.3, '#f2edd8');
+      bg.addColorStop(0.7, '#eae5d0');
+      bg.addColorStop(1, '#e5e0cc');
+      ctx!.fillStyle = bg;
       ctx!.fillRect(0, 0, w, h);
 
-      // green left panel
+      // Green left border strip
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.fillRect(0, 0, w * 0.08, h);
+      ctx!.fillRect(0, 0, w * 0.06, h);
 
-      // green right panel
+      // Green right border strip
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.fillRect(w * 0.92, 0, w * 0.08, h);
+      ctx!.fillRect(w * 0.94, 0, w * 0.06, h);
 
-      // top green banner
+      // Top thin green bar
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.fillRect(w * 0.08, 0, w * 0.84, h * 0.06);
+      ctx!.fillRect(w * 0.06, 0, w * 0.88, h * 0.045);
 
-      // bottom green banner
+      // Bottom thin green bar
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.fillRect(w * 0.08, h * 0.94, w * 0.84, h * 0.06);
+      ctx!.fillRect(w * 0.06, h * 0.955, w * 0.88, h * 0.045);
 
-      // inner border
+      // Inner ornamental border
       ctx!.strokeStyle = '#1a6b3c';
-      ctx!.lineWidth = 1;
-      ctx!.strokeRect(w * 0.04, h * 0.04, w * 0.92, h * 0.92);
+      ctx!.lineWidth = 0.8;
+      ctx!.strokeRect(w * 0.035, h * 0.035, w * 0.93, h * 0.93);
 
-      // "FEDERAL RESERVE NOTE" top
-      ctx!.fillStyle = '#1a1a1a';
-      ctx!.font = `bold ${w * 0.035}px serif`;
+      // "FEDERAL RESERVE NOTE"
+      ctx!.fillStyle = '#222';
+      ctx!.font = `600 ${w * 0.032}px serif`;
       ctx!.textAlign = 'center';
-      ctx!.fillText('FEDERAL RESERVE NOTE', w * 0.5, h * 0.14);
+      ctx!.fillText('FEDERAL RESERVE NOTE', w * 0.5, h * 0.13);
 
-      // "THE UNITED STATES OF AMERICA" banner
-      ctx!.fillStyle = '#1a1a1a';
-      ctx!.font = `bold ${w * 0.04}px serif`;
-      ctx!.fillText('THE UNITED STATES OF AMERICA', w * 0.5, h * 0.24);
+      // "THE UNITED STATES OF AMERICA"
+      ctx!.fillStyle = '#222';
+      ctx!.font = `bold ${w * 0.038}px serif`;
+      ctx!.fillText('THE UNITED STATES OF AMERICA', w * 0.5, h * 0.23);
 
-      // Large "100" top-left
+      // Large "100" top-left in green
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.font = `bold ${w * 0.14}px serif`;
+      ctx!.font = `bold ${w * 0.13}px serif`;
       ctx!.textAlign = 'left';
-      ctx!.fillText('100', w * 0.06, h * 0.45);
+      ctx!.fillText('100', w * 0.065, h * 0.48);
 
-      // Benjamin Franklin portrait area (shaded oval)
+      // Franklin portrait oval
       ctx!.save();
       ctx!.beginPath();
-      ctx!.ellipse(w * 0.38, h * 0.55, w * 0.12, h * 0.32, 0, 0, Math.PI * 2);
-      ctx!.fillStyle = 'rgba(26, 107, 60, 0.12)';
+      ctx!.ellipse(w * 0.4, h * 0.55, w * 0.115, h * 0.33, 0, 0, Math.PI * 2);
+      const portraitGrad = ctx!.createRadialGradient(w * 0.4, h * 0.5, 0, w * 0.4, h * 0.55, w * 0.12);
+      portraitGrad.addColorStop(0, 'rgba(26,107,60,0.18)');
+      portraitGrad.addColorStop(1, 'rgba(26,107,60,0.06)');
+      ctx!.fillStyle = portraitGrad;
       ctx!.fill();
       ctx!.strokeStyle = '#1a6b3c';
-      ctx!.lineWidth = 1.5;
+      ctx!.lineWidth = 1.2;
       ctx!.stroke();
       ctx!.restore();
 
-      // Portrait detail lines (simplified face)
-      ctx!.strokeStyle = 'rgba(26, 107, 60, 0.3)';
-      ctx!.lineWidth = 0.8;
-      // forehead
+      // Simplified Franklin face
+      ctx!.strokeStyle = 'rgba(26,107,60,0.45)';
+      ctx!.lineWidth = 0.7;
+      // head outline
       ctx!.beginPath();
-      ctx!.arc(w * 0.38, h * 0.38, w * 0.06, Math.PI * 0.8, Math.PI * 0.2);
+      ctx!.arc(w * 0.4, h * 0.48, w * 0.065, Math.PI * 0.85, Math.PI * 0.15);
       ctx!.stroke();
-      // eyes
+      // left eye
       ctx!.beginPath();
-      ctx!.arc(w * 0.35, h * 0.5, w * 0.015, 0, Math.PI * 2);
+      ctx!.ellipse(w * 0.375, h * 0.5, w * 0.012, w * 0.008, 0, 0, Math.PI * 2);
       ctx!.stroke();
+      // right eye
       ctx!.beginPath();
-      ctx!.arc(w * 0.41, h * 0.5, w * 0.015, 0, Math.PI * 2);
+      ctx!.ellipse(w * 0.42, h * 0.5, w * 0.012, w * 0.008, 0, 0, Math.PI * 2);
       ctx!.stroke();
       // nose
       ctx!.beginPath();
-      ctx!.moveTo(w * 0.38, h * 0.52);
-      ctx!.lineTo(w * 0.38, h * 0.6);
+      ctx!.moveTo(w * 0.398, h * 0.53);
+      ctx!.quadraticCurveTo(w * 0.39, h * 0.6, w * 0.4, h * 0.61);
       ctx!.stroke();
       // mouth
       ctx!.beginPath();
-      ctx!.arc(w * 0.38, h * 0.65, w * 0.025, 0.1, Math.PI - 0.1);
+      ctx!.arc(w * 0.4, h * 0.66, w * 0.022, 0.15, Math.PI - 0.15);
       ctx!.stroke();
 
-      // Blue security strip
-      ctx!.fillStyle = 'rgba(60, 100, 180, 0.5)';
-      ctx!.fillRect(w * 0.56, h * 0.08, w * 0.02, h * 0.84);
+      // Blue 3D security ribbon (vertical)
+      const ribbonGrad = ctx!.createLinearGradient(w * 0.56, 0, w * 0.59, 0);
+      ribbonGrad.addColorStop(0, 'rgba(40,80,180,0.65)');
+      ribbonGrad.addColorStop(0.5, 'rgba(80,130,220,0.75)');
+      ribbonGrad.addColorStop(1, 'rgba(40,80,180,0.65)');
+      ctx!.fillStyle = ribbonGrad;
+      ctx!.fillRect(w * 0.56, h * 0.06, w * 0.025, h * 0.88);
 
-      // Gold "100" watermark area (right)
-      ctx!.fillStyle = 'rgba(180, 150, 60, 0.25)';
-      ctx!.font = `bold ${w * 0.1}px serif`;
-      ctx!.textAlign = 'center';
-      ctx!.fillText('100', w * 0.73, h * 0.65);
-
-      // Gold inkwell
+      // Gold inkwell with liberty bell
       ctx!.beginPath();
-      ctx!.arc(w * 0.63, h * 0.65, w * 0.04, 0, Math.PI * 2);
-      ctx!.fillStyle = 'rgba(180, 150, 60, 0.4)';
+      ctx!.arc(w * 0.64, h * 0.65, w * 0.035, 0, Math.PI * 2);
+      const inkGrad = ctx!.createRadialGradient(w * 0.64, h * 0.63, 0, w * 0.64, h * 0.65, w * 0.035);
+      inkGrad.addColorStop(0, 'rgba(210,170,60,0.7)');
+      inkGrad.addColorStop(1, 'rgba(180,140,40,0.4)');
+      ctx!.fillStyle = inkGrad;
       ctx!.fill();
-      ctx!.strokeStyle = 'rgba(180, 150, 60, 0.6)';
-      ctx!.lineWidth = 1;
+      ctx!.strokeStyle = 'rgba(180,140,40,0.6)';
+      ctx!.lineWidth = 0.8;
       ctx!.stroke();
 
-      // Serial numbers
+      // Gold watermark "100" right area
+      ctx!.fillStyle = 'rgba(200,165,50,0.2)';
+      ctx!.font = `bold ${w * 0.09}px serif`;
+      ctx!.textAlign = 'center';
+      ctx!.fillText('100', w * 0.75, h * 0.65);
+
+      // Green serial numbers
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.font = `bold ${w * 0.03}px monospace`;
+      ctx!.font = `bold ${w * 0.028}px monospace`;
       ctx!.textAlign = 'left';
-      ctx!.fillText('LL 87901308 C', w * 0.12, h * 0.35);
-      ctx!.fillText('LL 87901308 C', w * 0.58, h * 0.88);
+      ctx!.fillText('LL 87901308 C', w * 0.1, h * 0.34);
+      ctx!.fillText('LL 87901308 C', w * 0.58, h * 0.9);
 
       // "L12" district
-      ctx!.fillStyle = '#1a1a1a';
-      ctx!.font = `bold ${w * 0.03}px serif`;
-      ctx!.fillText('L12', w * 0.12, h * 0.88);
+      ctx!.fillStyle = '#222';
+      ctx!.font = `bold ${w * 0.028}px serif`;
+      ctx!.fillText('L12', w * 0.1, h * 0.9);
 
-      // Bottom "100"
+      // Bottom-right "100"
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.font = `bold ${w * 0.1}px serif`;
+      ctx!.font = `bold ${w * 0.09}px serif`;
       ctx!.textAlign = 'right';
-      ctx!.fillText('100', w * 0.94, h * 0.88);
+      ctx!.fillText('100', w * 0.935, h * 0.9);
 
-      // Fine outer border
+      // Outer border
       ctx!.strokeStyle = '#1a6b3c';
-      ctx!.lineWidth = 2;
+      ctx!.lineWidth = 1.8;
       ctx!.strokeRect(0, 0, w, h);
     }
 
-    // ── draw the BACK of a $100 bill ──
+    // ── BACK of $100 ──
     function drawBack(w: number, h: number) {
-      // background
-      const g = ctx!.createLinearGradient(0, 0, w, h);
-      g.addColorStop(0, '#d0e8c0');
-      g.addColorStop(0.5, '#c8e0b8');
-      g.addColorStop(1, '#d0e8c0');
-      ctx!.fillStyle = g;
+      // Light green paper
+      const bg = ctx!.createLinearGradient(0, 0, w, h);
+      bg.addColorStop(0, '#c8deb0');
+      bg.addColorStop(0.5, '#d0e6b8');
+      bg.addColorStop(1, '#c8deb0');
+      ctx!.fillStyle = bg;
       ctx!.fillRect(0, 0, w, h);
 
-      // green borders
+      // Green borders
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.fillRect(0, 0, w * 0.06, h);
-      ctx!.fillRect(w * 0.94, 0, w * 0.06, h);
-      ctx!.fillRect(w * 0.06, 0, w * 0.88, h * 0.06);
-      ctx!.fillRect(w * 0.06, h * 0.94, w * 0.88, h * 0.06);
+      ctx!.fillRect(0, 0, w * 0.05, h);
+      ctx!.fillRect(w * 0.95, 0, w * 0.05, h);
+      ctx!.fillRect(w * 0.05, 0, w * 0.9, h * 0.045);
+      ctx!.fillRect(w * 0.05, h * 0.955, w * 0.9, h * 0.045);
 
       // "THE UNITED STATES OF AMERICA"
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.font = `bold ${w * 0.04}px serif`;
+      ctx!.font = `bold ${w * 0.038}px serif`;
       ctx!.textAlign = 'center';
-      ctx!.fillText('THE UNITED STATES OF AMERICA', w * 0.5, h * 0.18);
+      ctx!.fillText('THE UNITED STATES OF AMERICA', w * 0.5, h * 0.16);
 
       // "IN GOD WE TRUST"
-      ctx!.font = `bold ${w * 0.05}px serif`;
-      ctx!.fillText('IN GOD WE TRUST', w * 0.5, h * 0.35);
+      ctx!.font = `bold ${w * 0.045}px serif`;
+      ctx!.fillText('IN GOD WE TRUST', w * 0.5, h * 0.32);
 
-      // Independence Hall (simplified building)
+      // Independence Hall
       ctx!.strokeStyle = '#1a6b3c';
       ctx!.lineWidth = 1;
-      // main body
-      ctx!.strokeRect(w * 0.25, h * 0.4, w * 0.5, h * 0.3);
-      // roof
+      // main building body
+      ctx!.fillStyle = 'rgba(26,107,60,0.08)';
+      ctx!.fillRect(w * 0.22, h * 0.4, w * 0.56, h * 0.32);
+      ctx!.strokeRect(w * 0.22, h * 0.4, w * 0.56, h * 0.32);
+      // roof line
       ctx!.beginPath();
-      ctx!.moveTo(w * 0.22, h * 0.4);
+      ctx!.moveTo(w * 0.2, h * 0.4);
       ctx!.lineTo(w * 0.5, h * 0.28);
-      ctx!.lineTo(w * 0.78, h * 0.4);
+      ctx!.lineTo(w * 0.8, h * 0.4);
       ctx!.closePath();
       ctx!.stroke();
-      // tower/steeple
-      ctx!.strokeRect(w * 0.46, h * 0.15, w * 0.08, h * 0.13);
+      // center tower
+      ctx!.strokeRect(w * 0.45, h * 0.15, w * 0.1, h * 0.13);
       ctx!.beginPath();
-      ctx!.moveTo(w * 0.46, h * 0.15);
-      ctx!.lineTo(w * 0.5, h * 0.08);
-      ctx!.lineTo(w * 0.54, h * 0.15);
+      ctx!.moveTo(w * 0.45, h * 0.15);
+      ctx!.lineTo(w * 0.5, h * 0.06);
+      ctx!.lineTo(w * 0.55, h * 0.15);
       ctx!.closePath();
       ctx!.stroke();
-      // windows
-      for (let i = 0; i < 5; i++) {
-        ctx!.strokeRect(w * 0.28 + i * w * 0.09, h * 0.48, w * 0.04, h * 0.08);
+      // windows row
+      for (let i = 0; i < 6; i++) {
+        ctx!.strokeRect(w * 0.25 + i * w * 0.085, h * 0.47, w * 0.04, h * 0.09);
       }
       // door
-      ctx!.strokeRect(w * 0.46, h * 0.55, w * 0.08, h * 0.15);
+      ctx!.strokeRect(w * 0.465, h * 0.56, w * 0.07, h * 0.16);
+      // columns
+      ctx!.strokeRect(w * 0.44, h * 0.4, w * 0.01, h * 0.32);
+      ctx!.strokeRect(w * 0.55, h * 0.4, w * 0.01, h * 0.32);
 
       // "ONE HUNDRED DOLLARS"
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.font = `bold ${w * 0.035}px serif`;
-      ctx!.fillText('ONE HUNDRED DOLLARS', w * 0.5, h * 0.82);
+      ctx!.font = `bold ${w * 0.032}px serif`;
+      ctx!.textAlign = 'center';
+      ctx!.fillText('ONE HUNDRED DOLLARS', w * 0.5, h * 0.84);
 
-      // Large gold "100" right side
-      ctx!.fillStyle = 'rgba(180, 150, 60, 0.6)';
-      ctx!.font = `bold ${w * 0.16}px serif`;
+      // Large gold "100" right
+      ctx!.fillStyle = 'rgba(195,160,50,0.7)';
+      ctx!.font = `bold ${w * 0.15}px serif`;
       ctx!.textAlign = 'right';
-      ctx!.fillText('100', w * 0.93, h * 0.78);
+      ctx!.fillText('100', w * 0.94, h * 0.82);
 
-      // "100" left side
+      // Green "100" left
       ctx!.fillStyle = '#1a6b3c';
-      ctx!.font = `bold ${w * 0.1}px serif`;
+      ctx!.font = `bold ${w * 0.09}px serif`;
       ctx!.textAlign = 'left';
-      ctx!.fillText('100', w * 0.06, h * 0.85);
+      ctx!.fillText('100', w * 0.055, h * 0.88);
 
-      // outer border
+      // Outer border
       ctx!.strokeStyle = '#1a6b3c';
-      ctx!.lineWidth = 2;
+      ctx!.lineWidth = 1.8;
       ctx!.strokeRect(0, 0, w, h);
     }
 
-    let t = 0;
-
     function animate() {
       ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
-      t++;
 
       for (let i = bills.length - 1; i >= 0; i--) {
         const b = bills[i];
 
-        // physics
-        b.vy = Math.min(b.vy + 0.005, 2.2);
+        // Gravity + terminal velocity
+        b.vy = Math.min(b.vy + 0.02, 3);
         b.y += b.vy;
 
-        // wobble (realistic air flutter)
+        // Side-to-side flutter
         b.wobblePhase += b.wobbleFreq;
-        const wobbleX = Math.sin(b.wobblePhase) * b.wobbleAmp * 0.15;
-        b.x += wobbleX * 0.1;
+        b.x += Math.sin(b.wobblePhase) * b.wobbleAmp * 0.02;
 
-        // rotation flutter
-        b.rotSpeed += (Math.random() - 0.5) * 0.003;
-        b.rotSpeed *= 0.99;
+        // Rotation with random flutter
+        b.rotSpeed += (Math.random() - 0.5) * 0.004;
+        b.rotSpeed *= 0.98;
         b.rotation += b.rotSpeed;
 
-        // keep in bounds
-        if (b.x < -100) b.x = canvas!.width + 100;
-        if (b.x > canvas!.width + 100) b.x = -100;
+        // Wrap horizontally
+        if (b.x < -120) b.x = canvas!.width + 120;
+        if (b.x > canvas!.width + 120) b.x = -120;
 
-        // respawn at top
-        if (b.y > canvas!.height + 100) {
+        // Respawn when off bottom
+        if (b.y > canvas!.height + 120) {
           bills[i] = spawn();
           continue;
         }
 
-        // draw
+        // Draw
         const w = BILL_W * b.scale;
         const h = BILL_H * b.scale;
 

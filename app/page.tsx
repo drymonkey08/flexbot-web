@@ -63,16 +63,16 @@ export default function Home() {
           <div className="flex gap-3 sm:gap-6">
             <button
               onClick={() => setShowForm(!showForm)}
-              className="px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest border-2 border-black hover:bg-black hover:text-white transition-all"
+              className="px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest border-2 border-black text-black bg-white hover:bg-black hover:text-white transition-all"
             >
               Generate
             </button>
-            <button className="px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest border-2 border-black hover:bg-black hover:text-white transition-all hidden sm:block">
+            <button className="px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest border-2 border-black text-black bg-white hover:bg-black hover:text-white transition-all hidden sm:block">
               About Us
             </button>
             <button
               onClick={() => setShowContact(true)}
-              className="px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest border-2 border-black hover:bg-black hover:text-white transition-all"
+              className="px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest border-2 border-black text-black bg-white hover:bg-black hover:text-white transition-all"
             >
               Contact Us
             </button>
@@ -164,7 +164,7 @@ export default function Home() {
             {/* Floating callout - right side */}
             <div className="absolute -right-2 sm:right-[-120px] top-1/4 hidden lg:block">
               <div className="border-l-2 border-black pl-3 max-w-[150px]">
-                <p className="text-[10px] font-mono leading-relaxed">
+                <p className="text-[10px] font-mono leading-relaxed text-black">
                   <span className="font-bold">Find out</span> what your flex
                   photos can look like
                 </p>
@@ -196,16 +196,16 @@ export default function Home() {
         <div className="absolute right-4 sm:right-10 top-28 sm:top-32 z-20 hidden lg:block">
           <div className="flex gap-12 text-[10px] font-mono">
             <div>
-              <span className="font-bold">&lt;35+&gt;</span>
-              <span className="ml-2 text-gray-500">Outfit choices</span>
+              <span className="font-bold text-black">&lt;35+&gt;</span>
+              <span className="ml-2 text-gray-700">Outfit choices</span>
             </div>
             <div>
-              <span className="font-bold">&lt;38+&gt;</span>
-              <span className="ml-2 text-gray-500">Pose actions available</span>
+              <span className="font-bold text-black">&lt;38+&gt;</span>
+              <span className="ml-2 text-gray-700">Pose actions available</span>
             </div>
           </div>
           <div className="mt-3 text-right">
-            <p className="text-[10px] text-gray-500 font-mono leading-relaxed max-w-[200px] ml-auto">
+            <p className="text-[10px] text-gray-700 font-mono leading-relaxed max-w-[200px] ml-auto">
               Quality that Withstands<br />
               Time and Imagination
             </p>
