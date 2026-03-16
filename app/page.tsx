@@ -19,6 +19,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
+  const [showContact, setShowContact] = useState(false);
+  const [showSystem, setShowSystem] = useState(false);
 
   const handleGenerate = async (data: {
     name: string;
@@ -63,12 +65,12 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-white relative overflow-hidden">
+    <main className="min-h-screen bg-white relative">
+      {/* Animated gradient background effect */}
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 pointer-events-none z-0" />
+
       {/* Falling money animation */}
       <FallingMoney />
-
-      {/* Animated gradient background effect */}
-      <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 pointer-events-none" />
 
       {/* Header */}
       <header className="relative bg-white/80 backdrop-blur border-b border-gray-200 sticky top-0 z-50">
@@ -78,8 +80,8 @@ export default function Home() {
             <p className="text-xs text-gray-600 font-bold tracking-wider">PREMEDITATED MILLIONAIRE</p>
           </div>
           <div className="flex gap-6 text-sm font-bold text-gray-700 uppercase">
-            <button className="hover:text-purple-600 transition duration-300">SYSTEM</button>
-            <button className="hover:text-purple-600 transition duration-300">CONTACT</button>
+            <button onClick={() => setShowSystem(!showSystem)} className="hover:text-purple-600 transition duration-300">SYSTEM</button>
+            <button onClick={() => setShowContact(!showContact)} className="hover:text-purple-600 transition duration-300">CONTACT</button>
           </div>
         </div>
       </header>
@@ -175,6 +177,74 @@ export default function Home() {
           <p className="text-gray-600 text-sm font-mono">© 2026 FLEXBOT | THIS IS WHAT IT LOOKS LIKE WHEN YOU MOVE DIFFERENT 🚀</p>
         </div>
       </footer>
+
+      {/* System Modal */}
+      {showSystem && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 border-2 border-blue-300 shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">SYSTEM</h2>
+              <button onClick={() => setShowSystem(false)} className="text-2xl font-bold text-gray-600 hover:text-gray-800">×</button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-bold text-blue-700 uppercase mb-1">APP VERSION</p>
+                <p className="text-sm text-gray-700">v1.0.0 (2026)</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-purple-700 uppercase mb-1">PLATFORM</p>
+                <p className="text-sm text-gray-700">Next.js 14 + Vercel</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-blue-700 uppercase mb-1">IMAGE ENGINE</p>
+                <p className="text-sm text-gray-700">Google Gemini AI</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-purple-700 uppercase mb-1">GITHUB REPOSITORY</p>
+                <a href="https://github.com/darshytwan/flexbot-web" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 font-semibold">darshytwan/flexbot-web →</a>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-blue-700 uppercase mb-1">STATUS</p>
+                <p className="text-sm text-green-600 font-semibold">🟢 OPERATIONAL</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Modal */}
+      {showContact && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 border-2 border-purple-300 shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">CONTACT</h2>
+              <button onClick={() => setShowContact(false)} className="text-2xl font-bold text-gray-600 hover:text-gray-800">×</button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-bold text-blue-700 uppercase mb-1">EMAIL</p>
+                <a href="mailto:contact@flexbot.com" className="text-sm text-blue-600 hover:text-blue-800 font-semibold">contact@flexbot.com</a>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-purple-700 uppercase mb-1">DISCORD</p>
+                <a href="https://discord.gg/flexbot" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 font-semibold">Join Discord Server →</a>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-blue-700 uppercase mb-1">TWITTER / X</p>
+                <a href="https://twitter.com/flexbot" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 font-semibold">@flexbot</a>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-purple-700 uppercase mb-1">GITHUB</p>
+                <a href="https://github.com/darshytwan" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 font-semibold">@darshytwan</a>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-blue-700 uppercase mb-1">INSTAGRAM</p>
+                <a href="https://instagram.com/premeditated.millionaire" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 font-semibold">@premeditated.millionaire</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
