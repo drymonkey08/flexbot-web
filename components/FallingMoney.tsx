@@ -34,12 +34,12 @@ export default function FallingMoney() {
         money.push({
           x: Math.random() * canvas!.width,
           y: Math.random() * canvas!.height - canvas!.height,
-          vx: (Math.random() - 0.5) * 3,
-          vy: Math.random() * 2 + 1,
+          vx: (Math.random() - 0.5) * 2,
+          vy: Math.random() * 1.5 + 0.8,
           rotation: Math.random() * Math.PI * 2,
-          vr: (Math.random() - 0.5) * 0.1,
-          size: Math.random() * 15 + 20,
-          opacity: Math.random() * 0.3 + 0.3,
+          vr: (Math.random() - 0.5) * 0.08,
+          size: Math.random() * 12 + 18,
+          opacity: Math.random() * 0.4 + 0.35,
         });
       }
     }
@@ -48,8 +48,8 @@ export default function FallingMoney() {
 
     // Animation loop
     function animate() {
-      // Clear canvas
-      ctx!.fillStyle = 'rgba(255, 255, 255, 0.01)';
+      // Clear canvas with trail effect matching gray background
+      ctx!.fillStyle = 'rgba(245, 245, 245, 0.02)';
       ctx!.fillRect(0, 0, canvas!.width, canvas!.height);
 
       // Draw and update money
@@ -116,8 +116,8 @@ export default function FallingMoney() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-10"
-      style={{ opacity: 0.8, mixBlendMode: 'screen' }}
+      className="fixed inset-0 pointer-events-none z-5"
+      style={{ opacity: 1 }}
     />
   );
 }
