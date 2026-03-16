@@ -8,7 +8,6 @@ export default function FallingMoney() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -18,197 +17,298 @@ export default function FallingMoney() {
     interface Bill {
       x: number;
       y: number;
-      vx: number;
       vy: number;
       rotation: number;
-      rotationSpeed: number;
-      wobbleAmount: number;
-      wobbleSpeed: number;
-      wobbleOffset: number;
-      width: number;
-      height: number;
+      rotSpeed: number;
+      wobblePhase: number;
+      wobbleAmp: number;
+      wobbleFreq: number;
+      scale: number;
       opacity: number;
-      time: number;
+      showFront: boolean;
     }
 
     const bills: Bill[] = [];
+    const BILL_W = 180;
+    const BILL_H = 76;
+    const MAX_BILLS = 12;
 
-    function createBill(): Bill {
+    function spawn(): Bill {
       return {
         x: Math.random() * canvas!.width,
-        y: -100,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: Math.random() * 0.5 + 0.3,
-        rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.08,
-        wobbleAmount: Math.random() * 2 + 1,
-        wobbleSpeed: Math.random() * 0.04 + 0.02,
-        wobbleOffset: Math.random() * Math.PI * 2,
-        width: 160,
-        height: 80,
-        opacity: 0.85,
-        time: 0,
+        y: -BILL_H * (1 + Math.random() * 2),
+        vy: 0.4 + Math.random() * 0.6,
+        rotation: (Math.random() - 0.5) * 0.6,
+        rotSpeed: (Math.random() - 0.5) * 0.02,
+        wobblePhase: Math.random() * Math.PI * 2,
+        wobbleAmp: 40 + Math.random() * 60,
+        wobbleFreq: 0.008 + Math.random() * 0.008,
+        scale: 0.7 + Math.random() * 0.4,
+        opacity: 0.75 + Math.random() * 0.2,
+        showFront: Math.random() > 0.3,
       };
     }
 
-    // Create initial bills
-    for (let i = 0; i < 3; i++) {
-      bills.push(createBill());
+    for (let i = 0; i < MAX_BILLS; i++) {
+      const b = spawn();
+      b.y = Math.random() * canvas.height;
+      bills.push(b);
     }
 
-    function drawBill(bill: Bill) {
+    // ── draw the FRONT of a $100 bill ──
+    function drawFront(w: number, h: number) {
+      // background
+      const g = ctx!.createLinearGradient(0, 0, w, h);
+      g.addColorStop(0, '#e8e4d4');
+      g.addColorStop(0.35, '#f0ece0');
+      g.addColorStop(0.65, '#e2ddd0');
+      g.addColorStop(1, '#d8d4c4');
+      ctx!.fillStyle = g;
+      ctx!.fillRect(0, 0, w, h);
+
+      // green left panel
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.fillRect(0, 0, w * 0.08, h);
+
+      // green right panel
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.fillRect(w * 0.92, 0, w * 0.08, h);
+
+      // top green banner
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.fillRect(w * 0.08, 0, w * 0.84, h * 0.06);
+
+      // bottom green banner
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.fillRect(w * 0.08, h * 0.94, w * 0.84, h * 0.06);
+
+      // inner border
+      ctx!.strokeStyle = '#1a6b3c';
+      ctx!.lineWidth = 1;
+      ctx!.strokeRect(w * 0.04, h * 0.04, w * 0.92, h * 0.92);
+
+      // "FEDERAL RESERVE NOTE" top
+      ctx!.fillStyle = '#1a1a1a';
+      ctx!.font = `bold ${w * 0.035}px serif`;
+      ctx!.textAlign = 'center';
+      ctx!.fillText('FEDERAL RESERVE NOTE', w * 0.5, h * 0.14);
+
+      // "THE UNITED STATES OF AMERICA" banner
+      ctx!.fillStyle = '#1a1a1a';
+      ctx!.font = `bold ${w * 0.04}px serif`;
+      ctx!.fillText('THE UNITED STATES OF AMERICA', w * 0.5, h * 0.24);
+
+      // Large "100" top-left
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.font = `bold ${w * 0.14}px serif`;
+      ctx!.textAlign = 'left';
+      ctx!.fillText('100', w * 0.06, h * 0.45);
+
+      // Benjamin Franklin portrait area (shaded oval)
       ctx!.save();
-      ctx!.globalAlpha = bill.opacity;
-      ctx!.translate(bill.x, bill.y);
-      ctx!.rotate(bill.rotation);
-
-      // Main background - realistic green
-      const gradient = ctx!.createLinearGradient(
-        -bill.width / 2,
-        -bill.height / 2,
-        -bill.width / 2,
-        bill.height / 2
-      );
-      gradient.addColorStop(0, '#0d5d2f');
-      gradient.addColorStop(0.5, '#2d8659');
-      gradient.addColorStop(1, '#0d5d2f');
-
-      ctx!.fillStyle = gradient;
-      ctx!.fillRect(-bill.width / 2, -bill.height / 2, bill.width, bill.height);
-
-      // Outer border
-      ctx!.strokeStyle = '#053d19';
-      ctx!.lineWidth = 3;
-      ctx!.strokeRect(-bill.width / 2, -bill.height / 2, bill.width, bill.height);
-
-      // Inner gold border
-      ctx!.strokeStyle = '#c9a961';
+      ctx!.beginPath();
+      ctx!.ellipse(w * 0.38, h * 0.55, w * 0.12, h * 0.32, 0, 0, Math.PI * 2);
+      ctx!.fillStyle = 'rgba(26, 107, 60, 0.12)';
+      ctx!.fill();
+      ctx!.strokeStyle = '#1a6b3c';
       ctx!.lineWidth = 1.5;
-      ctx!.strokeRect(
-        -bill.width / 2 + 6,
-        -bill.height / 2 + 6,
-        bill.width - 12,
-        bill.height - 12
-      );
+      ctx!.stroke();
+      ctx!.restore();
 
-      // Large "100" on left side
-      ctx!.fillStyle = '#ffffff';
-      ctx!.font = `bold ${bill.width * 0.32}px 'Arial Black'`;
+      // Portrait detail lines (simplified face)
+      ctx!.strokeStyle = 'rgba(26, 107, 60, 0.3)';
+      ctx!.lineWidth = 0.8;
+      // forehead
+      ctx!.beginPath();
+      ctx!.arc(w * 0.38, h * 0.38, w * 0.06, Math.PI * 0.8, Math.PI * 0.2);
+      ctx!.stroke();
+      // eyes
+      ctx!.beginPath();
+      ctx!.arc(w * 0.35, h * 0.5, w * 0.015, 0, Math.PI * 2);
+      ctx!.stroke();
+      ctx!.beginPath();
+      ctx!.arc(w * 0.41, h * 0.5, w * 0.015, 0, Math.PI * 2);
+      ctx!.stroke();
+      // nose
+      ctx!.beginPath();
+      ctx!.moveTo(w * 0.38, h * 0.52);
+      ctx!.lineTo(w * 0.38, h * 0.6);
+      ctx!.stroke();
+      // mouth
+      ctx!.beginPath();
+      ctx!.arc(w * 0.38, h * 0.65, w * 0.025, 0.1, Math.PI - 0.1);
+      ctx!.stroke();
+
+      // Blue security strip
+      ctx!.fillStyle = 'rgba(60, 100, 180, 0.5)';
+      ctx!.fillRect(w * 0.56, h * 0.08, w * 0.02, h * 0.84);
+
+      // Gold "100" watermark area (right)
+      ctx!.fillStyle = 'rgba(180, 150, 60, 0.25)';
+      ctx!.font = `bold ${w * 0.1}px serif`;
       ctx!.textAlign = 'center';
-      ctx!.textBaseline = 'middle';
-      ctx!.fillText('100', -bill.width * 0.35, 0);
+      ctx!.fillText('100', w * 0.73, h * 0.65);
 
-      // Large "100" on right side
-      ctx!.fillText('100', bill.width * 0.35, 0);
+      // Gold inkwell
+      ctx!.beginPath();
+      ctx!.arc(w * 0.63, h * 0.65, w * 0.04, 0, Math.PI * 2);
+      ctx!.fillStyle = 'rgba(180, 150, 60, 0.4)';
+      ctx!.fill();
+      ctx!.strokeStyle = 'rgba(180, 150, 60, 0.6)';
+      ctx!.lineWidth = 1;
+      ctx!.stroke();
 
-      // Center text - "UNITED STATES OF AMERICA"
-      ctx!.fillStyle = '#ffffff';
-      ctx!.font = `bold ${bill.width * 0.11}px Arial`;
+      // Serial numbers
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.font = `bold ${w * 0.03}px monospace`;
+      ctx!.textAlign = 'left';
+      ctx!.fillText('LL 87901308 C', w * 0.12, h * 0.35);
+      ctx!.fillText('LL 87901308 C', w * 0.58, h * 0.88);
+
+      // "L12" district
+      ctx!.fillStyle = '#1a1a1a';
+      ctx!.font = `bold ${w * 0.03}px serif`;
+      ctx!.fillText('L12', w * 0.12, h * 0.88);
+
+      // Bottom "100"
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.font = `bold ${w * 0.1}px serif`;
+      ctx!.textAlign = 'right';
+      ctx!.fillText('100', w * 0.94, h * 0.88);
+
+      // Fine outer border
+      ctx!.strokeStyle = '#1a6b3c';
+      ctx!.lineWidth = 2;
+      ctx!.strokeRect(0, 0, w, h);
+    }
+
+    // ── draw the BACK of a $100 bill ──
+    function drawBack(w: number, h: number) {
+      // background
+      const g = ctx!.createLinearGradient(0, 0, w, h);
+      g.addColorStop(0, '#d0e8c0');
+      g.addColorStop(0.5, '#c8e0b8');
+      g.addColorStop(1, '#d0e8c0');
+      ctx!.fillStyle = g;
+      ctx!.fillRect(0, 0, w, h);
+
+      // green borders
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.fillRect(0, 0, w * 0.06, h);
+      ctx!.fillRect(w * 0.94, 0, w * 0.06, h);
+      ctx!.fillRect(w * 0.06, 0, w * 0.88, h * 0.06);
+      ctx!.fillRect(w * 0.06, h * 0.94, w * 0.88, h * 0.06);
+
+      // "THE UNITED STATES OF AMERICA"
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.font = `bold ${w * 0.04}px serif`;
       ctx!.textAlign = 'center';
-      ctx!.fillText('UNITED STATES', 0, -bill.height * 0.18);
-      ctx!.font = `bold ${bill.width * 0.1}px Arial`;
-      ctx!.fillText('OF AMERICA', 0, bill.height * 0.05);
+      ctx!.fillText('THE UNITED STATES OF AMERICA', w * 0.5, h * 0.18);
+
+      // "IN GOD WE TRUST"
+      ctx!.font = `bold ${w * 0.05}px serif`;
+      ctx!.fillText('IN GOD WE TRUST', w * 0.5, h * 0.35);
+
+      // Independence Hall (simplified building)
+      ctx!.strokeStyle = '#1a6b3c';
+      ctx!.lineWidth = 1;
+      // main body
+      ctx!.strokeRect(w * 0.25, h * 0.4, w * 0.5, h * 0.3);
+      // roof
+      ctx!.beginPath();
+      ctx!.moveTo(w * 0.22, h * 0.4);
+      ctx!.lineTo(w * 0.5, h * 0.28);
+      ctx!.lineTo(w * 0.78, h * 0.4);
+      ctx!.closePath();
+      ctx!.stroke();
+      // tower/steeple
+      ctx!.strokeRect(w * 0.46, h * 0.15, w * 0.08, h * 0.13);
+      ctx!.beginPath();
+      ctx!.moveTo(w * 0.46, h * 0.15);
+      ctx!.lineTo(w * 0.5, h * 0.08);
+      ctx!.lineTo(w * 0.54, h * 0.15);
+      ctx!.closePath();
+      ctx!.stroke();
+      // windows
+      for (let i = 0; i < 5; i++) {
+        ctx!.strokeRect(w * 0.28 + i * w * 0.09, h * 0.48, w * 0.04, h * 0.08);
+      }
+      // door
+      ctx!.strokeRect(w * 0.46, h * 0.55, w * 0.08, h * 0.15);
 
       // "ONE HUNDRED DOLLARS"
-      ctx!.fillStyle = '#ffffff';
-      ctx!.font = `${bill.width * 0.075}px Arial`;
-      ctx!.fillText('ONE HUNDRED DOLLARS', 0, bill.height * 0.28);
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.font = `bold ${w * 0.035}px serif`;
+      ctx!.fillText('ONE HUNDRED DOLLARS', w * 0.5, h * 0.82);
 
-      // Serial numbers - top left
-      ctx!.fillStyle = '#ffffff';
-      ctx!.font = `${bill.width * 0.06}px 'Courier New'`;
-      ctx!.textAlign = 'left';
-      ctx!.fillText('A 12345678 B', -bill.width * 0.47, -bill.height * 0.36);
-
-      // Serial numbers - top right
+      // Large gold "100" right side
+      ctx!.fillStyle = 'rgba(180, 150, 60, 0.6)';
+      ctx!.font = `bold ${w * 0.16}px serif`;
       ctx!.textAlign = 'right';
-      ctx!.fillText('A 12345678 B', bill.width * 0.47, -bill.height * 0.36);
+      ctx!.fillText('100', w * 0.93, h * 0.78);
 
-      // Series year
+      // "100" left side
+      ctx!.fillStyle = '#1a6b3c';
+      ctx!.font = `bold ${w * 0.1}px serif`;
       ctx!.textAlign = 'left';
-      ctx!.font = `${bill.width * 0.055}px Arial`;
-      ctx!.fillText('Series 2023', -bill.width * 0.47, bill.height * 0.36);
+      ctx!.fillText('100', w * 0.06, h * 0.85);
 
-      // Federal Reserve
-      ctx!.textAlign = 'right';
-      ctx!.fillText('Federal Reserve', bill.width * 0.47, bill.height * 0.36);
-
-      // Decorative corner seals
-      ctx!.strokeStyle = '#ffffff';
-      ctx!.lineWidth = 1.5;
-      ctx!.beginPath();
-      ctx!.arc(-bill.width * 0.42, -bill.height * 0.35, 6, 0, Math.PI * 2);
-      ctx!.stroke();
-
-      ctx!.beginPath();
-      ctx!.arc(bill.width * 0.42, bill.height * 0.35, 6, 0, Math.PI * 2);
-      ctx!.stroke();
-
-      // Security feature - fine lines
-      ctx!.strokeStyle = '#ffffff';
-      ctx!.lineWidth = 0.5;
-      ctx!.globalAlpha = bill.opacity * 0.5;
-      for (let i = 0; i < 10; i++) {
-        const x = -bill.width * 0.45 + i * (bill.width * 0.09);
-        ctx!.beginPath();
-        ctx!.moveTo(x, -bill.height * 0.2);
-        ctx!.lineTo(x, bill.height * 0.2);
-        ctx!.stroke();
-      }
-
-      // Portrait area shading
-      ctx!.globalAlpha = bill.opacity * 0.12;
-      ctx!.fillStyle = '#ffffff';
-      ctx!.fillRect(
-        -bill.width * 0.3,
-        -bill.height * 0.3,
-        bill.width * 0.12,
-        bill.height * 0.6
-      );
-
-      ctx!.restore();
+      // outer border
+      ctx!.strokeStyle = '#1a6b3c';
+      ctx!.lineWidth = 2;
+      ctx!.strokeRect(0, 0, w, h);
     }
+
+    let t = 0;
 
     function animate() {
       ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
+      t++;
 
       for (let i = bills.length - 1; i >= 0; i--) {
-        const bill = bills[i];
+        const b = bills[i];
 
-        // Update position
-        bill.y += bill.vy;
-        bill.vy += 0.15; // gravity
-        bill.vy = Math.min(bill.vy, 3); // terminal velocity
+        // physics
+        b.vy = Math.min(b.vy + 0.005, 2.2);
+        b.y += b.vy;
 
-        // Wobble effect (side to side flutter)
-        bill.wobbleOffset += bill.wobbleSpeed;
-        bill.x += Math.sin(bill.wobbleOffset) * bill.wobbleAmount * 0.01;
+        // wobble (realistic air flutter)
+        b.wobblePhase += b.wobbleFreq;
+        const wobbleX = Math.sin(b.wobblePhase) * b.wobbleAmp * 0.15;
+        b.x += wobbleX * 0.1;
 
-        // Rotation with flutter
-        bill.rotation += bill.rotationSpeed;
-        bill.rotationSpeed += (Math.random() - 0.5) * 0.01; // flutter effect
-        bill.rotationSpeed *= 0.98; // damping
+        // rotation flutter
+        b.rotSpeed += (Math.random() - 0.5) * 0.003;
+        b.rotSpeed *= 0.99;
+        b.rotation += b.rotSpeed;
 
-        // Keep x in bounds
-        if (bill.x < -50) bill.x = canvas!.width + 50;
-        if (bill.x > canvas!.width + 50) bill.x = -50;
+        // keep in bounds
+        if (b.x < -100) b.x = canvas!.width + 100;
+        if (b.x > canvas!.width + 100) b.x = -100;
 
-        // Fade in/out effect
-        if (bill.y < 100) {
-          bill.opacity = Math.min(0.85, bill.y / 100);
-        } else if (bill.y > canvas!.height - 100) {
-          bill.opacity = 0.85 * ((canvas!.height - bill.y) / 100);
-        } else {
-          bill.opacity = 0.85;
+        // respawn at top
+        if (b.y > canvas!.height + 100) {
+          bills[i] = spawn();
+          continue;
         }
 
-        // Remove when fully off screen and not visible
-        if (bill.y > canvas!.height + 150) {
-          bills.splice(i, 1);
-          bills.push(createBill());
+        // draw
+        const w = BILL_W * b.scale;
+        const h = BILL_H * b.scale;
+
+        ctx!.save();
+        ctx!.globalAlpha = b.opacity;
+        ctx!.translate(b.x, b.y);
+        ctx!.rotate(b.rotation);
+        ctx!.translate(-w / 2, -h / 2);
+
+        if (b.showFront) {
+          drawFront(w, h);
         } else {
-          drawBill(bill);
+          drawBack(w, h);
         }
+
+        ctx!.restore();
       }
 
       requestAnimationFrame(animate);
@@ -220,7 +320,6 @@ export default function FallingMoney() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -229,7 +328,6 @@ export default function FallingMoney() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 1 }}
     />
   );
 }
