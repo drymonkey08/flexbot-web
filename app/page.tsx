@@ -113,9 +113,11 @@ export default function Home() {
         date: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
       };
-      const updated = [item, ...gallery];
-      setGallery(updated);
-      saveGallery(updated);
+      setGallery(prev => {
+        const updated = [item, ...prev];
+        saveGallery(updated);
+        return updated;
+      });
     } catch (err) {
       console.error('Generate error:', err);
       alert(err instanceof Error ? err.message : 'Generation failed');
@@ -140,6 +142,12 @@ export default function Home() {
   // ═══════════════════════════════════════
   const renderHome = () => (
     <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 72px)' }}>
+      {/* FlexBot branding */}
+      <div className="flex items-center gap-2 mb-4">
+        <h1 className="text-2xl font-bold tracking-tight">FlexBot</h1>
+        <span className="text-lg">⚡</span>
+      </div>
+
       {/* Category Cards — 2x2 grid matching reference */}
       <div className="grid grid-cols-2 gap-3 mb-5">
         <div className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden border border-accent/20 shadow-[0_0_15px_rgba(229,57,53,0.08)]">
