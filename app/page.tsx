@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { OUTFITS, SCENES, POSES } from '@/lib/data';
+import { OUTFITS, SCENES, POSES, PANTS, SHOES } from '@/lib/data';
 
 // ─── Types ───
 interface GenerateResponse {
@@ -68,7 +68,10 @@ export default function Home() {
   const [outfitKey, setOutfitKey] = useState('');
   const [sceneKey, setSceneKey] = useState('');
   const [poseKey, setPoseKey] = useState('');
+  const [pantsKey, setPantsKey] = useState('');
+  const [shoesKey, setShoesKey] = useState('');
   const [showOptions, setShowOptions] = useState(false);
+  const [activeOption, setActiveOption] = useState<'outfit' | 'scene' | 'pose' | 'pants' | 'shoes'>('outfit');
 
   useEffect(() => {
     setGallery(loadGallery());
@@ -90,6 +93,8 @@ export default function Home() {
           outfitKey: outfitKey || undefined,
           sceneKey: sceneKey || undefined,
           poseKey: poseKey || undefined,
+          pantsKey: pantsKey || undefined,
+          shoesKey: shoesKey || undefined,
         }),
       });
       if (!response.ok) {
@@ -144,61 +149,11 @@ export default function Home() {
     <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 72px)' }}>
       {/* FlexBot branding */}
       <div className="flex items-center gap-2 mb-4">
-        <h1 className="text-2xl font-bold tracking-tight">FlexBot</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">FlexBot</h1>
         <span className="text-lg">⚡</span>
       </div>
 
-      {/* Category Cards — 2x2 grid matching reference */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden border border-accent/20 shadow-[0_0_15px_rgba(229,57,53,0.08)]">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
-          <div className="absolute top-4 left-4 right-4 bottom-4 flex items-center justify-center">
-            <span className="text-5xl">👔</span>
-          </div>
-          <div className="relative z-20">
-            <span className="text-sm font-semibold">Outfits</span>
-            <span className="ml-2 bg-accent text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase">35+</span>
-          </div>
-        </div>
-
-        <div className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden border border-accent/20 shadow-[0_0_15px_rgba(229,57,53,0.08)]">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
-          <div className="absolute top-4 left-4 right-4 bottom-4 flex items-center justify-center">
-            <span className="text-5xl">🏙️</span>
-          </div>
-          <div className="relative z-20">
-            <span className="text-sm font-semibold">Scenes</span>
-            <span className="ml-2 text-[10px] text-gray-400">33+</span>
-          </div>
-        </div>
-
-        <div className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden border border-accent/20 shadow-[0_0_15px_rgba(229,57,53,0.08)]">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
-          <div className="absolute top-4 left-4 right-4 bottom-4 flex items-center justify-center">
-            <span className="text-5xl">💪</span>
-          </div>
-          <div className="relative z-20">
-            <span className="text-sm font-semibold">Poses</span>
-            <span className="ml-2 text-[10px] text-gray-400">38+</span>
-          </div>
-        </div>
-
-        <div
-          onClick={() => document.getElementById('name-input')?.focus()}
-          className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden cursor-pointer border border-accent/30 shadow-[0_0_20px_rgba(229,57,53,0.12)]"
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-accent/20 via-transparent to-transparent z-10" />
-          <div className="absolute top-4 left-4 right-4 bottom-4 flex items-center justify-center">
-            <span className="text-5xl">⚡</span>
-          </div>
-          <div className="relative z-20">
-            <span className="text-sm font-semibold">Generate</span>
-            <span className="ml-2 text-[10px] text-gray-400">3 photos</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Search-style input — like "Where to?" */}
+      {/* Search-style input — above cards */}
       <div className="flex items-center gap-2 mb-4">
         <div className="flex-1 relative">
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
@@ -213,63 +168,162 @@ export default function Home() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
-            placeholder="Who's flexing?"
-            className="w-full pl-10 pr-4 py-3.5 text-sm bg-[#2A2A2E] rounded-full text-white placeholder-gray-400 font-medium focus:ring-2 focus:ring-accent/50 border-0"
+            placeholder="What Celebrity Is Flexing?"
+            className="w-full pl-10 pr-4 py-3.5 text-sm bg-gray-100 rounded-full text-gray-900 placeholder-gray-400 font-medium focus:ring-2 focus:ring-accent/50 border-0"
           />
         </div>
+      </div>
+
+      {/* Category Cards — 3x2 grid, tappable to open picker */}
+      <div className="grid grid-cols-3 gap-2.5 mb-5">
         <button
-          onClick={() => setShowOptions(!showOptions)}
-          className="h-[46px] px-4 bg-[#2A2A2E] rounded-full text-xs font-semibold text-white flex items-center gap-1.5 shrink-0"
+          onClick={() => { setShowOptions(true); setActiveOption('outfit'); }}
+          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
         >
-          Options
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <polyline points={showOptions ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
-          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl">👔</span>
+          </div>
+          <div className="relative z-20">
+            <span className="text-xs font-semibold text-white">Outfits</span>
+            {outfitKey && <p className="text-[9px] text-gray-400 truncate">{outfitKey.replace(/_/g, ' ')}</p>}
+          </div>
+        </button>
+
+        <button
+          onClick={() => { setShowOptions(true); setActiveOption('pants'); }}
+          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl">👖</span>
+          </div>
+          <div className="relative z-20">
+            <span className="text-xs font-semibold text-white">Pants</span>
+            {pantsKey && <p className="text-[9px] text-gray-400 truncate">{pantsKey.replace(/_/g, ' ')}</p>}
+          </div>
+        </button>
+
+        <button
+          onClick={() => { setShowOptions(true); setActiveOption('shoes'); }}
+          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl">👟</span>
+          </div>
+          <div className="relative z-20">
+            <span className="text-xs font-semibold text-white">Shoes</span>
+            {shoesKey && <p className="text-[9px] text-gray-400 truncate">{shoesKey.replace(/_/g, ' ')}</p>}
+          </div>
+        </button>
+
+        <button
+          onClick={() => { setShowOptions(true); setActiveOption('scene'); }}
+          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl">🏙️</span>
+          </div>
+          <div className="relative z-20">
+            <span className="text-xs font-semibold text-white">Scenes</span>
+            {sceneKey && <p className="text-[9px] text-gray-400 truncate">{sceneKey.replace(/_/g, ' ')}</p>}
+          </div>
+        </button>
+
+        <button
+          onClick={() => { setShowOptions(true); setActiveOption('pose'); }}
+          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl">💪</span>
+          </div>
+          <div className="relative z-20">
+            <span className="text-xs font-semibold text-white">Poses</span>
+            {poseKey && <p className="text-[9px] text-gray-400 truncate">{poseKey.replace(/_/g, ' ')}</p>}
+          </div>
+        </button>
+
+        <button
+          onClick={() => document.getElementById('name-input')?.focus()}
+          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden cursor-pointer border border-accent/30 text-left active:scale-[0.97] transition"
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-accent/15 via-transparent to-transparent z-10" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl">⚡</span>
+          </div>
+          <div className="relative z-20">
+            <span className="text-xs font-semibold text-white">Generate</span>
+          </div>
         </button>
       </div>
 
-      {/* Options panel */}
+      {/* Options picker — opens when a card is tapped */}
       {showOptions && (
-        <div className="bg-surface rounded-2xl p-4 mb-4 space-y-3 border border-surface-lighter">
-          <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Outfit</label>
+        <div className="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-gray-900 uppercase tracking-wider">
+              {activeOption === 'outfit' ? 'Choose Outfit' : activeOption === 'scene' ? 'Choose Scene' : activeOption === 'pose' ? 'Choose Pose' : activeOption === 'pants' ? 'Choose Pants' : 'Choose Shoes'}
+            </span>
+            <button onClick={() => setShowOptions(false)} className="text-xs text-accent font-semibold">Done</button>
+          </div>
+          {activeOption === 'outfit' && (
             <select
               value={outfitKey}
               onChange={(e) => setOutfitKey(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm bg-surface-light border border-surface-lighter rounded-xl text-white appearance-none cursor-pointer"
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-900 appearance-none cursor-pointer"
             >
               <option value="">Random</option>
               {Object.keys(OUTFITS).map((key) => (
                 <option key={key} value={key}>{key.replace(/_/g, ' ').toUpperCase()}</option>
               ))}
             </select>
-          </div>
-          <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Scene</label>
+          )}
+          {activeOption === 'pants' && (
+            <select
+              value={pantsKey}
+              onChange={(e) => setPantsKey(e.target.value)}
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-900 appearance-none cursor-pointer"
+            >
+              <option value="">Random</option>
+              {Object.keys(PANTS).map((key) => (
+                <option key={key} value={key}>{key.replace(/_/g, ' ').toUpperCase()}</option>
+              ))}
+            </select>
+          )}
+          {activeOption === 'shoes' && (
+            <select
+              value={shoesKey}
+              onChange={(e) => setShoesKey(e.target.value)}
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-900 appearance-none cursor-pointer"
+            >
+              <option value="">Random</option>
+              {Object.keys(SHOES).map((key) => (
+                <option key={key} value={key}>{key.replace(/_/g, ' ').toUpperCase()}</option>
+              ))}
+            </select>
+          )}
+          {activeOption === 'scene' && (
             <select
               value={sceneKey}
               onChange={(e) => setSceneKey(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm bg-surface-light border border-surface-lighter rounded-xl text-white appearance-none cursor-pointer"
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-900 appearance-none cursor-pointer"
             >
               <option value="">Random</option>
               {Object.keys(SCENES).map((key) => (
                 <option key={key} value={key}>{key.replace(/_/g, ' ').toUpperCase()}</option>
               ))}
             </select>
-          </div>
-          <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Pose</label>
+          )}
+          {activeOption === 'pose' && (
             <select
               value={poseKey}
               onChange={(e) => setPoseKey(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm bg-surface-light border border-surface-lighter rounded-xl text-white appearance-none cursor-pointer"
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-900 appearance-none cursor-pointer"
             >
               <option value="">Random</option>
               {Object.keys(POSES).map((key) => (
                 <option key={key} value={key}>{key.replace(/_/g, ' ').toUpperCase()}</option>
               ))}
             </select>
-          </div>
+          )}
         </div>
       )}
 
@@ -286,28 +340,26 @@ export default function Home() {
 
       {/* Loading state */}
       {isLoading && !images.length && (
-        <div className="bg-surface rounded-2xl p-6 mb-4 flex flex-col items-center justify-center" style={{ minHeight: 200 }}>
+        <div className="bg-gray-50 rounded-2xl p-6 mb-4 flex flex-col items-center justify-center border border-gray-200" style={{ minHeight: 200 }}>
           <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-xs text-gray-400">Creating {name}&apos;s flex photos...</p>
-          <p className="text-[10px] text-gray-600 mt-1">This takes 30-45 seconds</p>
+          <p className="text-xs text-gray-500">Creating {name}&apos;s flex photos...</p>
+          <p className="text-[10px] text-gray-400 mt-1">This takes 30-45 seconds</p>
         </div>
       )}
 
       {/* Results */}
       {images.length > 0 && (
         <div className="mb-5">
-          {/* Featured image — large card like reference Activity first item */}
-          <div className="bg-surface rounded-2xl overflow-hidden mb-3 border border-surface-lighter">
+          <div className="bg-white rounded-2xl overflow-hidden mb-3 border border-gray-200 shadow-sm">
             <div className="relative">
               <img
                 src={`data:image/png;base64,${images[selectedIndex]}`}
                 alt={`${name} flex`}
                 className="w-full block"
               />
-              {/* Download overlay button */}
               <button
                 onClick={() => downloadImage(images[selectedIndex], `flexbot-${name}-${selectedIndex + 1}.png`)}
-                className="absolute bottom-3 right-3 w-10 h-10 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"
+                className="absolute bottom-3 right-3 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
@@ -319,7 +371,7 @@ export default function Home() {
             <div className="px-4 py-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold">{name}</p>
+                  <p className="text-sm font-semibold text-gray-900">{name}</p>
                   <p className="text-[10px] text-gray-500 mt-0.5">
                     {outfitKey ? outfitKey.replace(/_/g, ' ') : 'Random outfit'} · Photo {selectedIndex + 1}/3
                   </p>
@@ -338,14 +390,13 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Thumbnail row */}
           <div className="grid grid-cols-3 gap-2">
             {images.map((img, idx) => (
               <button
                 key={idx}
                 onClick={() => setSelectedIndex(idx)}
                 className={`aspect-square rounded-xl overflow-hidden border-2 transition ${
-                  selectedIndex === idx ? 'border-accent' : 'border-transparent'
+                  selectedIndex === idx ? 'border-accent' : 'border-gray-200'
                 }`}
               >
                 <img src={`data:image/png;base64,${img}`} alt="" className="w-full h-full object-cover" />
@@ -355,7 +406,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Recent generations — compact list like reference */}
+      {/* Recent generations */}
       {gallery.length > 0 && !isLoading && images.length === 0 && (
         <div>
           <p className="text-xs text-gray-500 mb-2">Recent</p>
@@ -363,17 +414,17 @@ export default function Home() {
             <button
               key={item.id}
               onClick={() => { setViewingItem(item); setViewingIndex(0); setTab('gallery'); }}
-              className="w-full flex items-center gap-3 py-3 border-b border-surface-lighter text-left"
+              className="w-full flex items-center gap-3 py-3 border-b border-gray-100 text-left"
             >
-              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-light">
+              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                 <img src={`data:image/png;base64,${item.images[0]}`} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{item.name}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
                 <p className="text-[10px] text-gray-500">{item.outfit.replace(/_/g, ' ')} · {item.scene.replace(/_/g, ' ')}</p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-surface-light flex items-center justify-center flex-shrink-0">
-                <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 1l5 5-5 5" />
                 </svg>
               </div>
@@ -391,7 +442,7 @@ export default function Home() {
     <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 72px)' }}>
       {/* Header */}
       <div className="flex items-center gap-2 mb-1">
-        <h1 className="text-2xl font-bold">Activity</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Activity</h1>
         <span className="text-lg">🔥</span>
       </div>
 
@@ -405,8 +456,7 @@ export default function Home() {
             ← Back
           </button>
 
-          {/* Featured card */}
-          <div className="bg-surface rounded-2xl overflow-hidden mb-3 border border-surface-lighter">
+          <div className="bg-white rounded-2xl overflow-hidden mb-3 border border-gray-200 shadow-sm">
             <div className="relative">
               <img
                 src={`data:image/png;base64,${viewingItem.images[viewingIndex]}`}
@@ -415,7 +465,7 @@ export default function Home() {
               />
               <button
                 onClick={() => downloadImage(viewingItem.images[viewingIndex], `flexbot-${viewingItem.name}-${viewingIndex + 1}.png`)}
-                className="absolute bottom-3 right-3 w-10 h-10 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"
+                className="absolute bottom-3 right-3 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
@@ -426,26 +476,25 @@ export default function Home() {
             </div>
             <div className="px-4 py-3 flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold">{viewingItem.name}</p>
+                <p className="text-sm font-semibold text-gray-900">{viewingItem.name}</p>
                 <p className="text-[10px] text-gray-500">{viewingItem.date}, {viewingItem.time} · {viewingItem.outfit.replace(/_/g, ' ')}</p>
               </div>
               <button
                 onClick={() => deleteGalleryItem(viewingItem.id)}
-                className="text-[10px] text-gray-500 font-medium"
+                className="text-[10px] text-gray-400 font-medium"
               >
                 Delete
               </button>
             </div>
           </div>
 
-          {/* Thumbnails */}
           <div className="grid grid-cols-3 gap-2 mb-3">
             {viewingItem.images.map((img, idx) => (
               <button
                 key={idx}
                 onClick={() => setViewingIndex(idx)}
                 className={`aspect-square rounded-xl overflow-hidden border-2 transition ${
-                  viewingIndex === idx ? 'border-accent' : 'border-transparent'
+                  viewingIndex === idx ? 'border-accent' : 'border-gray-200'
                 }`}
               >
                 <img src={`data:image/png;base64,${img}`} alt="" className="w-full h-full object-cover" />
@@ -453,7 +502,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Download all */}
           <button
             onClick={() => {
               viewingItem.images.forEach((img, i) => {
@@ -467,22 +515,20 @@ export default function Home() {
         </div>
       ) : (
         <>
-          {/* Past label */}
-          <p className="text-xs text-gray-500 mb-4">Past</p>
+          <p className="text-xs text-gray-400 mb-4">Past</p>
 
           {gallery.length === 0 && (
             <div className="text-center py-20">
               <div className="text-5xl mb-4 opacity-50">📸</div>
               <p className="text-sm text-gray-500">No generations yet</p>
-              <p className="text-[10px] text-gray-600 mt-1">Create your first flex on the Home tab</p>
+              <p className="text-[10px] text-gray-400 mt-1">Create your first flex on the Home tab</p>
             </div>
           )}
 
-          {/* First item — large featured card (like reference) */}
           {gallery.length > 0 && (
             <button
               onClick={() => { setViewingItem(gallery[0]); setViewingIndex(0); }}
-              className="w-full bg-surface rounded-2xl overflow-hidden mb-4 text-left border border-accent/25 shadow-[0_0_20px_rgba(229,57,53,0.1)] active:opacity-90 transition"
+              className="w-full bg-white rounded-2xl overflow-hidden mb-4 text-left border border-gray-200 shadow-sm active:opacity-90 transition"
             >
               <div className="relative h-48 overflow-hidden">
                 <img
@@ -492,29 +538,28 @@ export default function Home() {
                 />
               </div>
               <div className="px-4 py-3">
-                <p className="text-sm font-semibold">{gallery[0].name}</p>
+                <p className="text-sm font-semibold text-gray-900">{gallery[0].name}</p>
                 <p className="text-[10px] text-gray-500 mt-0.5">{gallery[0].date}, {gallery[0].time}</p>
-                <p className="text-[10px] text-gray-600">{gallery[0].outfit.replace(/_/g, ' ')} · {gallery[0].scene.replace(/_/g, ' ')}</p>
+                <p className="text-[10px] text-gray-400">{gallery[0].outfit.replace(/_/g, ' ')} · {gallery[0].scene.replace(/_/g, ' ')}</p>
               </div>
             </button>
           )}
 
-          {/* Remaining items — compact list with red dot */}
           {gallery.slice(1).map((item) => (
             <button
               key={item.id}
               onClick={() => { setViewingItem(item); setViewingIndex(0); }}
-              className="w-full flex items-center gap-3 py-3.5 border-b border-surface-lighter text-left active:opacity-70 transition"
+              className="w-full flex items-center gap-3 py-3.5 border-b border-gray-100 text-left active:opacity-70 transition"
             >
-              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-light">
+              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                 <img src={`data:image/png;base64,${item.images[0]}`} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">{item.name}</p>
+                <p className="text-sm font-medium text-gray-900">{item.name}</p>
                 <p className="text-[10px] text-gray-500">
                   {item.date}, {item.time}
                 </p>
-                <p className="text-[10px] text-gray-600">{item.outfit.replace(/_/g, ' ')}</p>
+                <p className="text-[10px] text-gray-400">{item.outfit.replace(/_/g, ' ')}</p>
               </div>
               <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
                 <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -536,19 +581,19 @@ export default function Home() {
       {/* Greeting + Avatar */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-xl font-bold">Hi there 👋</p>
-          <p className="text-sm text-gray-400">Premeditated Millionaire</p>
+          <p className="text-xl font-bold text-gray-900">Hi there 👋</p>
+          <p className="text-sm text-gray-500">Premeditated Millionaire</p>
         </div>
-        <div className="w-14 h-14 bg-surface rounded-full flex items-center justify-center border-2 border-surface-lighter">
+        <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center border-2 border-gray-200">
           <span className="text-2xl">💰</span>
         </div>
       </div>
 
-      {/* 3 Action buttons — matching reference exactly */}
+      {/* 3 Action buttons */}
       <div className="grid grid-cols-3 gap-3 mb-8">
         <button
           onClick={() => setTab('gallery')}
-          className="bg-surface rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-accent/25 shadow-[0_0_12px_rgba(229,57,53,0.08)] active:opacity-80 transition"
+          className="bg-gray-50 rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-gray-200 shadow-sm active:opacity-80 transition"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="7" height="7" />
@@ -556,28 +601,28 @@ export default function Home() {
             <rect x="14" y="14" width="7" height="7" />
             <rect x="3" y="14" width="7" height="7" />
           </svg>
-          <span className="text-[11px] font-semibold">Gallery</span>
+          <span className="text-[11px] font-semibold text-gray-900">Gallery</span>
         </button>
-        <button className="bg-surface rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-accent/25 shadow-[0_0_12px_rgba(229,57,53,0.08)] active:opacity-80 transition">
+        <button className="bg-gray-50 rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-gray-200 shadow-sm active:opacity-80 transition">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          <span className="text-[11px] font-semibold">Downloads</span>
+          <span className="text-[11px] font-semibold text-gray-900">Downloads</span>
         </button>
         <button
           onClick={() => setTab('home')}
-          className="bg-surface rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-accent/25 shadow-[0_0_12px_rgba(229,57,53,0.08)] active:opacity-80 transition"
+          className="bg-gray-50 rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-gray-200 shadow-sm active:opacity-80 transition"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
           </svg>
-          <span className="text-[11px] font-semibold">Generate</span>
+          <span className="text-[11px] font-semibold text-gray-900">Generate</span>
         </button>
       </div>
 
-      {/* Menu items — matching reference style */}
+      {/* Menu items */}
       <div className="space-y-0">
         <MenuRow icon="📊" label="Stats" value={`${totalGenerated} images`} />
         <MenuRow icon="⚙️" label="Settings" />
@@ -586,15 +631,14 @@ export default function Home() {
         <MenuRow icon="ℹ️" label="About" />
       </div>
 
-      {/* Version — bottom right like reference */}
       <div className="mt-8 text-right">
-        <p className="text-[10px] text-gray-600">v2.0.0</p>
+        <p className="text-[10px] text-gray-400">v2.0.0</p>
       </div>
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-dark relative max-w-md mx-auto">
+    <main className="min-h-screen bg-white relative max-w-md mx-auto">
       <div className="pt-safe">
         {tab === 'home' && renderHome()}
         {tab === 'gallery' && renderGallery()}
@@ -603,14 +647,14 @@ export default function Home() {
 
       {/* ─── Bottom Navigation ─── */}
       <nav className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="max-w-md mx-auto bg-[#1C1C1E]/98 backdrop-blur-xl border-t border-surface-lighter">
+        <div className="max-w-md mx-auto bg-white/95 backdrop-blur-xl border-t border-gray-200">
           <div className="flex justify-around items-center h-[72px] pb-safe">
             <BottomTab
               active={tab === 'home'}
               label="Home"
               onClick={() => setTab('home')}
               icon={
-                <svg width="22" height="22" viewBox="0 0 24 24" fill={tab === 'home' ? '#E53935' : 'none'} stroke={tab === 'home' ? '#E53935' : '#666'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill={tab === 'home' ? '#E53935' : 'none'} stroke={tab === 'home' ? '#E53935' : '#aaa'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                   <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
@@ -621,7 +665,7 @@ export default function Home() {
               label="Activity"
               onClick={() => { setTab('gallery'); setViewingItem(null); }}
               icon={
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab === 'gallery' ? '#E53935' : '#666'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab === 'gallery' ? '#E53935' : '#aaa'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="7" height="7" rx="1" />
                   <rect x="14" y="3" width="7" height="7" rx="1" />
                   <rect x="14" y="14" width="7" height="7" rx="1" />
@@ -634,7 +678,7 @@ export default function Home() {
               label="Profile"
               onClick={() => setTab('profile')}
               icon={
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab === 'profile' ? '#E53935' : '#666'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab === 'profile' ? '#E53935' : '#aaa'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
@@ -653,22 +697,22 @@ function BottomTab({ icon, label, active, onClick }: { icon: React.ReactNode; la
   return (
     <button onClick={onClick} className="flex flex-col items-center gap-0.5 py-1 px-5 transition active:opacity-70">
       {icon}
-      <span className={`text-[10px] font-medium ${active ? 'text-accent' : 'text-gray-500'}`}>{label}</span>
+      <span className={`text-[10px] font-medium ${active ? 'text-accent' : 'text-gray-400'}`}>{label}</span>
     </button>
   );
 }
 
 function MenuRow({ icon, label, value }: { icon: string; label: string; value?: string }) {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-surface-lighter">
+    <div className="flex items-center justify-between py-4 border-b border-gray-100">
       <div className="flex items-center gap-3">
         <span className="text-base">{icon}</span>
-        <span className="text-sm font-medium">{label}</span>
+        <span className="text-sm font-medium text-gray-900">{label}</span>
       </div>
       <div className="flex items-center gap-2">
-        {value && <span className="text-[10px] text-gray-500">{value}</span>}
-        <div className="w-7 h-7 rounded-full bg-surface-light flex items-center justify-center">
-          <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        {value && <span className="text-[10px] text-gray-400">{value}</span>}
+        <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
+          <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="#bbb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 1l5 5-5 5" />
           </svg>
         </div>

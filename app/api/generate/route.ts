@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OUTFITS, SCENES, POSES, getRandomOutfit, getRandomScene, getRandomPoses } from '@/lib/data';
+import { OUTFITS, SCENES, POSES, PANTS, SHOES, getRandomOutfit, getRandomScene, getRandomPoses, getRandomPants, getRandomShoes } from '@/lib/data';
 import { buildPromptsForGeneration } from '@/lib/buildPrompt';
 
 export const maxDuration = 300;
@@ -9,6 +9,8 @@ interface GenerateRequest {
   outfitKey?: string;
   sceneKey?: string;
   poseKey?: string;
+  pantsKey?: string;
+  shoesKey?: string;
   customOutfit?: string;
   customPose?: string;
   customPrompt?: string;
@@ -64,7 +66,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: GenerateRequest = await request.json();
 
-    const { name, outfitKey, sceneKey, poseKey, customOutfit, customPose } = body;
+    const { name, outfitKey, sceneKey, poseKey, pantsKey, shoesKey, customOutfit, customPose } = body;
 
     if (!name || name.trim() === '') {
       return NextResponse.json(
@@ -85,7 +87,7 @@ export async function POST(request: NextRequest) {
     let scene: { scene: string; light: string };
     let poses: [string, string, string];
 
-    // Resolve outfit
+    // Resolve base outfit (top/shirt)
     if (customOutfit) {
       outfit = customOutfit;
     } else if (outfitKey && OUTFITS[outfitKey]) {
@@ -93,6 +95,14 @@ export async function POST(request: NextRequest) {
     } else {
       outfit = getRandomOutfit();
     }
+
+    // Resolve pants — append to outfit if selected
+    const pants = pantsKey && PANTS[pantsKey] ? PANTS[pantsKey] : getRandomPants();
+    outfit += `, PANTS: ${pants}`;
+
+    // Resolve shoes — append to outfit if selected
+    const shoes = shoesKey && SHOES[shoesKey] ? SHOES[shoesKey] : getRandomShoes();
+    outfit += `, SHOES: ${shoes}`;
 
     // Resolve scene
     if (sceneKey && SCENES[sceneKey]) {
