@@ -142,10 +142,10 @@ export default function Home() {
     <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 72px)' }}>
       {/* Category Cards — 2x2 grid matching reference */}
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+        <div className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden border border-accent/20 shadow-[0_0_15px_rgba(229,57,53,0.08)]">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
           <div className="absolute top-4 left-4 right-4 bottom-4 flex items-center justify-center">
-            <span className="text-5xl opacity-80">👔</span>
+            <span className="text-5xl">👔</span>
           </div>
           <div className="relative z-20">
             <span className="text-sm font-semibold">Outfits</span>
@@ -153,35 +153,35 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+        <div className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden border border-accent/20 shadow-[0_0_15px_rgba(229,57,53,0.08)]">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
           <div className="absolute top-4 left-4 right-4 bottom-4 flex items-center justify-center">
-            <span className="text-5xl opacity-80">🏙️</span>
+            <span className="text-5xl">🏙️</span>
           </div>
           <div className="relative z-20">
             <span className="text-sm font-semibold">Scenes</span>
-            <span className="ml-2 text-[10px] text-gray-400">33+ locations</span>
+            <span className="ml-2 text-[10px] text-gray-400">33+</span>
           </div>
         </div>
 
-        <div className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+        <div className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden border border-accent/20 shadow-[0_0_15px_rgba(229,57,53,0.08)]">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
           <div className="absolute top-4 left-4 right-4 bottom-4 flex items-center justify-center">
-            <span className="text-5xl opacity-80">💪</span>
+            <span className="text-5xl">💪</span>
           </div>
           <div className="relative z-20">
             <span className="text-sm font-semibold">Poses</span>
-            <span className="ml-2 text-[10px] text-gray-400">38+ actions</span>
+            <span className="ml-2 text-[10px] text-gray-400">38+</span>
           </div>
         </div>
 
         <div
           onClick={() => document.getElementById('name-input')?.focus()}
-          className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden cursor-pointer"
+          className="bg-surface rounded-[20px] p-4 aspect-square flex flex-col justify-end relative overflow-hidden cursor-pointer border border-accent/30 shadow-[0_0_20px_rgba(229,57,53,0.12)]"
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-accent/30 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-accent/20 via-transparent to-transparent z-10" />
           <div className="absolute top-4 left-4 right-4 bottom-4 flex items-center justify-center">
-            <span className="text-5xl opacity-80">⚡</span>
+            <span className="text-5xl">⚡</span>
           </div>
           <div className="relative z-20">
             <span className="text-sm font-semibold">Generate</span>
@@ -194,7 +194,7 @@ export default function Home() {
       <div className="flex items-center gap-2 mb-4">
         <div className="flex-1 relative">
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
@@ -206,12 +206,12 @@ export default function Home() {
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
             placeholder="Who's flexing?"
-            className="w-full pl-10 pr-4 py-3.5 text-sm bg-surface rounded-full text-white placeholder-gray-500 font-medium focus:ring-2 focus:ring-accent/50 border border-surface-lighter"
+            className="w-full pl-10 pr-4 py-3.5 text-sm bg-[#2A2A2E] rounded-full text-white placeholder-gray-400 font-medium focus:ring-2 focus:ring-accent/50 border-0"
           />
         </div>
         <button
           onClick={() => setShowOptions(!showOptions)}
-          className="h-[46px] px-4 bg-surface border border-surface-lighter rounded-full text-xs font-semibold text-gray-300 flex items-center gap-1.5 shrink-0"
+          className="h-[46px] px-4 bg-[#2A2A2E] rounded-full text-xs font-semibold text-white flex items-center gap-1.5 shrink-0"
         >
           Options
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -350,6 +350,7 @@ export default function Home() {
       {/* Recent generations — compact list like reference */}
       {gallery.length > 0 && !isLoading && images.length === 0 && (
         <div>
+          <p className="text-xs text-gray-500 mb-2">Recent</p>
           {gallery.slice(0, 4).map((item) => (
             <button
               key={item.id}
@@ -363,8 +364,8 @@ export default function Home() {
                 <p className="text-sm font-medium truncate">{item.name}</p>
                 <p className="text-[10px] text-gray-500">{item.outfit.replace(/_/g, ' ')} · {item.scene.replace(/_/g, ' ')}</p>
               </div>
-              <div className="flex-shrink-0">
-                <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#555" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-8 h-8 rounded-full bg-surface-light flex items-center justify-center flex-shrink-0">
+                <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 1l5 5-5 5" />
                 </svg>
               </div>
@@ -383,9 +384,7 @@ export default function Home() {
       {/* Header */}
       <div className="flex items-center gap-2 mb-1">
         <h1 className="text-2xl font-bold">Activity</h1>
-        <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center">
-          <span className="text-[8px]">🔥</span>
-        </div>
+        <span className="text-lg">🔥</span>
       </div>
 
       {/* Viewing detail */}
@@ -475,7 +474,7 @@ export default function Home() {
           {gallery.length > 0 && (
             <button
               onClick={() => { setViewingItem(gallery[0]); setViewingIndex(0); }}
-              className="w-full bg-surface rounded-2xl overflow-hidden mb-4 text-left border border-surface-lighter active:opacity-90 transition"
+              className="w-full bg-surface rounded-2xl overflow-hidden mb-4 text-left border border-accent/25 shadow-[0_0_20px_rgba(229,57,53,0.1)] active:opacity-90 transition"
             >
               <div className="relative h-48 overflow-hidden">
                 <img
@@ -499,7 +498,9 @@ export default function Home() {
               onClick={() => { setViewingItem(item); setViewingIndex(0); }}
               className="w-full flex items-center gap-3 py-3.5 border-b border-surface-lighter text-left active:opacity-70 transition"
             >
-              <div className="w-2 h-2 rounded-full bg-accent flex-shrink-0" />
+              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-light">
+                <img src={`data:image/png;base64,${item.images[0]}`} alt="" className="w-full h-full object-cover" />
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">{item.name}</p>
                 <p className="text-[10px] text-gray-500">
@@ -507,8 +508,8 @@ export default function Home() {
                 </p>
                 <p className="text-[10px] text-gray-600">{item.outfit.replace(/_/g, ' ')}</p>
               </div>
-              <div className="flex-shrink-0">
-                <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#555" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 1l5 5-5 5" />
                 </svg>
               </div>
@@ -539,9 +540,9 @@ export default function Home() {
       <div className="grid grid-cols-3 gap-3 mb-8">
         <button
           onClick={() => setTab('gallery')}
-          className="bg-surface-light rounded-2xl py-4 flex flex-col items-center gap-2 border border-surface-lighter active:opacity-80 transition"
+          className="bg-surface rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-accent/25 shadow-[0_0_12px_rgba(229,57,53,0.08)] active:opacity-80 transition"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="7" height="7" />
             <rect x="14" y="3" width="7" height="7" />
             <rect x="14" y="14" width="7" height="7" />
@@ -549,8 +550,8 @@ export default function Home() {
           </svg>
           <span className="text-[11px] font-semibold">Gallery</span>
         </button>
-        <button className="bg-surface-light rounded-2xl py-4 flex flex-col items-center gap-2 border border-surface-lighter active:opacity-80 transition">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <button className="bg-surface rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-accent/25 shadow-[0_0_12px_rgba(229,57,53,0.08)] active:opacity-80 transition">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
@@ -559,9 +560,9 @@ export default function Home() {
         </button>
         <button
           onClick={() => setTab('home')}
-          className="bg-surface-light rounded-2xl py-4 flex flex-col items-center gap-2 border border-surface-lighter active:opacity-80 transition"
+          className="bg-surface rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-accent/25 shadow-[0_0_12px_rgba(229,57,53,0.08)] active:opacity-80 transition"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
           </svg>
           <span className="text-[11px] font-semibold">Generate</span>
@@ -594,7 +595,7 @@ export default function Home() {
 
       {/* ─── Bottom Navigation ─── */}
       <nav className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="max-w-md mx-auto bg-surface/95 backdrop-blur-lg border-t border-surface-lighter">
+        <div className="max-w-md mx-auto bg-[#1C1C1E]/98 backdrop-blur-xl border-t border-surface-lighter">
           <div className="flex justify-around items-center h-[72px] pb-safe">
             <BottomTab
               active={tab === 'home'}
@@ -654,13 +655,15 @@ function MenuRow({ icon, label, value }: { icon: string; label: string; value?: 
     <div className="flex items-center justify-between py-4 border-b border-surface-lighter">
       <div className="flex items-center gap-3">
         <span className="text-base">{icon}</span>
-        <span className="text-sm">{label}</span>
+        <span className="text-sm font-medium">{label}</span>
       </div>
       <div className="flex items-center gap-2">
         {value && <span className="text-[10px] text-gray-500">{value}</span>}
-        <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#555" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M1 1l5 5-5 5" />
-        </svg>
+        <div className="w-7 h-7 rounded-full bg-surface-light flex items-center justify-center">
+          <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 1l5 5-5 5" />
+          </svg>
+        </div>
       </div>
     </div>
   );
