@@ -8,10 +8,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        gold: '#C9A84C',
-      },
-      backgroundColor: {
-        'black-primary': '#0a0a0a',
+        accent: '#E53935',
+        'accent-dark': '#C62828',
+        'accent-light': '#EF5350',
+        surface: '#1C1C1E',
+        'surface-light': '#2C2C2E',
+        'surface-lighter': '#3A3A3C',
+        dark: '#0A0A0A',
       },
     },
   },

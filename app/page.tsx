@@ -1,22 +1,123 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import FlexForm from '@/components/FlexForm';
-import FallingMoney from '@/components/FallingMoney';
 
+// ─── Types ───
 interface GenerateResponse {
   images: string[];
   caption: string;
 }
 
+interface GalleryItem {
+  id: string;
+  name: string;
+  images: string[]; // base64
+  caption: string;
+  outfit: string;
+  scene: string;
+  date: string;
+}
+
+type Tab = 'home' | 'gallery' | 'profile';
+
+// ─── Icons (inline SVG for zero dependencies) ───
+function HomeIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? '#E53935' : '#888'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  );
+}
+
+function GalleryIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? '#E53935' : '#888'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+    </svg>
+  );
+}
+
+function ProfileIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? '#E53935' : '#888'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  );
+}
+
+function ChevronIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+}
+
+// ─── LocalStorage helpers ───
+function loadGallery(): GalleryItem[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem('flexbot-gallery');
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveGallery(items: GalleryItem[]) {
+  try {
+    localStorage.setItem('flexbot-gallery', JSON.stringify(items));
+  } catch {
+    // Storage full — remove oldest
+    items.pop();
+    localStorage.setItem('flexbot-gallery', JSON.stringify(items));
+  }
+}
+
+// ─── Download helper ───
+function downloadImage(base64: string, filename: string) {
+  const link = document.createElement('a');
+  link.href = `data:image/png;base64,${base64}`;
+  link.download = filename;
+  link.click();
+}
+
+// ═══════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════
 export default function Home() {
+  const [tab, setTab] = useState<Tab>('home');
   const [images, setImages] = useState<string[]>([]);
-  const [caption, setCaption] = useState('');
+  const [, setCaption] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [showContact, setShowContact] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [showForm, setShowForm] = useState(false);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [viewingItem, setViewingItem] = useState<GalleryItem | null>(null);
+  const [viewingIndex, setViewingIndex] = useState(0);
+  const [lastGenName, setLastGenName] = useState('');
+  const [lastGenOutfit, setLastGenOutfit] = useState('');
+  const [lastGenScene, setLastGenScene] = useState('');
+
+  useEffect(() => {
+    setGallery(loadGallery());
+  }, []);
 
   const handleGenerate = async (data: {
     name: string;
@@ -31,6 +132,10 @@ export default function Home() {
     setProgress(0);
     setImages([]);
     setCaption('');
+    setLastGenName(data.name);
+    setLastGenOutfit(data.outfitKey || 'Random');
+    setLastGenScene(data.sceneKey || 'Random');
+
     try {
       const response = await fetch('/api/generate', {
         method: 'POST',
@@ -45,6 +150,21 @@ export default function Home() {
       setImages(result.images);
       setCaption(result.caption);
       setProgress(3);
+      setSelectedIndex(0);
+
+      // Save to gallery
+      const item: GalleryItem = {
+        id: Date.now().toString(),
+        name: data.name,
+        images: result.images,
+        caption: result.caption,
+        outfit: data.outfitKey || 'Random',
+        scene: data.sceneKey || 'Random',
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      };
+      const updated = [item, ...gallery];
+      setGallery(updated);
+      saveGallery(updated);
     } catch (err) {
       console.error('Generate error:', err);
       alert(err instanceof Error ? err.message : 'Generation failed');
@@ -53,202 +173,212 @@ export default function Home() {
     }
   };
 
-  return (
-    <main className="min-h-screen bg-white relative overflow-x-hidden">
-      <FallingMoney />
+  const deleteGalleryItem = useCallback((id: string) => {
+    setGallery(prev => {
+      const updated = prev.filter(g => g.id !== id);
+      saveGallery(updated);
+      return updated;
+    });
+    if (viewingItem?.id === id) setViewingItem(null);
+  }, [viewingItem]);
 
-      {/* ─── Top Navigation ─── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm">
-        <div className="flex justify-between items-center px-5 sm:px-10 py-4">
-          <div className="flex gap-3 sm:gap-6">
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest border-2 border-black text-black bg-white hover:bg-black hover:text-white transition-all"
-            >
-              Generate
-            </button>
-            <button className="px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest border-2 border-black text-black bg-white hover:bg-black hover:text-white transition-all hidden sm:block">
-              About Us
-            </button>
-            <button
-              onClick={() => setShowContact(true)}
-              className="px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest border-2 border-black text-black bg-white hover:bg-black hover:text-white transition-all"
-            >
-              Contact Us
-            </button>
-          </div>
+  const totalGenerated = gallery.reduce((sum, g) => sum + g.images.length, 0);
+  const topCeleb = gallery.length > 0
+    ? Object.entries(
+        gallery.reduce((acc, g) => {
+          acc[g.name] = (acc[g.name] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>)
+      ).sort((a, b) => b[1] - a[1])[0]?.[0] || '—'
+    : '—';
 
-          {/* Logo center */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-4 hidden lg:block">
-            <div className="w-10 h-10 border-2 border-black rounded-full flex items-center justify-center">
-              <span className="text-xs font-black">F</span>
-            </div>
-          </div>
-
-          <div className="flex gap-3 sm:gap-5 items-center">
-            <span className="text-lg hover:opacity-60 transition cursor-pointer">♡</span>
-            <span className="text-lg hover:opacity-60 transition cursor-pointer hidden sm:inline">🛒</span>
-            <span className="text-lg hover:opacity-60 transition cursor-pointer">👤</span>
-          </div>
+  // ═══════════════════════════════════════
+  // HOME SCREEN
+  // ═══════════════════════════════════════
+  const renderHome = () => (
+    <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 80px)' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">FlexBot</h1>
+          <p className="text-xs text-gray-500 mt-0.5">Premeditated Millionaire</p>
         </div>
-      </nav>
-
-      {/* ─── Hero Section ─── */}
-      <div className="relative pt-20 sm:pt-24 min-h-screen z-10">
-
-        {/* Left side elements */}
-        <div className="absolute left-4 sm:left-10 top-28 sm:top-32 z-20 hidden sm:block">
-          {/* Small thumbnail / branding */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-black">FB</span>
-            </div>
-            <div className="w-10 h-10 border-2 border-black rounded-full flex items-center justify-center">
-              <span className="text-sm">↗</span>
-            </div>
-          </div>
-
-          {/* Vertical "SHOP" text */}
-          <div className="flex flex-col items-center gap-0 text-[10px] font-bold tracking-widest text-gray-700 mb-8">
-            {'FLEX'.split('').map((c, i) => (
-              <span key={i}>{c}</span>
-            ))}
-          </div>
-
-          {/* Callout */}
-          <div className="mt-4 max-w-[140px]">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-4 h-4 border border-black flex items-center justify-center text-[8px]">↓</div>
-              <span className="text-[10px] font-bold uppercase">Go to catalog now</span>
-            </div>
-          </div>
+        <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center">
+          <span className="text-white text-sm font-black">FB</span>
         </div>
+      </div>
 
-        {/* ─── Center: Large Image (the hero) ─── */}
-        <div className="flex justify-center items-start px-4 sm:px-0 pt-4 sm:pt-8">
-          <div className="relative w-full max-w-md sm:max-w-lg lg:max-w-xl">
-            {/* Main image area */}
-            {!images.length && !isLoading && (
-              <div className="aspect-[3/4] bg-gray-50 border border-gray-200 flex items-center justify-center rounded-2xl">
-                <div className="text-center px-8">
-                  <div className="text-6xl sm:text-8xl mb-4">💰</div>
-                  <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] font-mono text-black mb-2">
-                    Awaiting Flex Generation
-                  </p>
-                  <p className="text-[10px] text-black font-mono">
-                    Results will materialize here
-                  </p>
-                </div>
+      {/* Category Cards — matching reference layout */}
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="bg-surface rounded-2xl p-4 flex flex-col items-center justify-center aspect-square relative overflow-hidden">
+          <div className="text-3xl mb-2">👔</div>
+          <span className="text-xs font-semibold">Outfits</span>
+          <span className="text-[10px] text-gray-500 mt-0.5">35+ styles</span>
+          <div className="absolute top-2 right-2 bg-accent px-1.5 py-0.5 rounded text-[8px] font-bold">NEW</div>
+        </div>
+        <div className="bg-surface rounded-2xl p-4 flex flex-col items-center justify-center aspect-square">
+          <div className="text-3xl mb-2">🏙️</div>
+          <span className="text-xs font-semibold">Scenes</span>
+          <span className="text-[10px] text-gray-500 mt-0.5">33+ locations</span>
+        </div>
+        <div className="bg-surface rounded-2xl p-4 flex flex-col items-center justify-center aspect-square">
+          <div className="text-3xl mb-2">🤑</div>
+          <span className="text-xs font-semibold">Poses</span>
+          <span className="text-[10px] text-gray-500 mt-0.5">38+ actions</span>
+        </div>
+        <div className="bg-surface rounded-2xl p-4 flex flex-col items-center justify-center aspect-square">
+          <div className="text-3xl mb-2">⚡</div>
+          <span className="text-xs font-semibold">Generate</span>
+          <span className="text-[10px] text-gray-500 mt-0.5">3 photos / session</span>
+        </div>
+      </div>
+
+      {/* Generate Form */}
+      <div className="bg-surface rounded-2xl p-5 mb-6">
+        <h2 className="text-base font-bold mb-4">Create Your Flex</h2>
+        <FlexForm onGenerate={handleGenerate} isLoading={isLoading} progress={progress} />
+      </div>
+
+      {/* Results */}
+      {(images.length > 0 || isLoading) && (
+        <div className="bg-surface rounded-2xl p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold">{lastGenName}</h3>
+            <span className="text-[10px] text-gray-500">{lastGenOutfit} / {lastGenScene}</span>
+          </div>
+
+          {isLoading && !images.length && (
+            <div className="aspect-[3/4] bg-surface-light rounded-xl flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-xs text-gray-400">Generating {progress}/3...</p>
               </div>
-            )}
+            </div>
+          )}
 
-            {isLoading && !images.length && (
-              <div className="aspect-[3/4] bg-gray-50 border border-gray-200 flex items-center justify-center rounded-2xl">
-                <div className="text-center">
-                  <div className="w-12 h-12 border-3 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-xs uppercase tracking-widest font-mono">[{progress}/3]</p>
-                </div>
-              </div>
-            )}
-
-            {images.length > 0 && (
-              <div className="rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
+          {images.length > 0 && (
+            <>
+              {/* Main image */}
+              <div className="rounded-xl overflow-hidden mb-3">
                 <img
                   src={`data:image/png;base64,${images[selectedIndex]}`}
-                  alt="Generated flex"
+                  alt={`${lastGenName} flex`}
                   className="w-full block"
                 />
               </div>
-            )}
 
-            {/* Floating callout - right side */}
-            <div className="absolute -right-2 sm:right-[-120px] top-1/4 hidden lg:block">
-              <div className="border-l-2 border-black pl-3 max-w-[150px]">
-                <p className="text-[10px] font-mono leading-relaxed text-black">
-                  <span className="font-bold">Find out</span> what your flex
-                  photos can look like
-                </p>
-              </div>
-            </div>
-
-            {/* Size selectors - floating right */}
-            {images.length > 0 && (
-              <div className="absolute right-[-60px] top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-1">
-                {images.map((_, idx) => (
+              {/* Thumbnails */}
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {images.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedIndex(idx)}
-                    className={`w-8 h-8 border-2 text-[10px] font-bold transition-all ${
-                      selectedIndex === idx
-                        ? 'border-black bg-black text-white'
-                        : 'border-black bg-white hover:bg-gray-100'
+                    className={`aspect-square rounded-lg overflow-hidden border-2 transition ${
+                      selectedIndex === idx ? 'border-accent' : 'border-transparent'
                     }`}
                   >
-                    {idx + 1}
+                    <img src={`data:image/png;base64,${img}`} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
-            )}
-          </div>
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => downloadImage(images[selectedIndex], `flexbot-${lastGenName}-${selectedIndex + 1}.png`)}
+                  className="flex-1 py-3 bg-accent text-white text-xs font-bold uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition"
+                >
+                  <DownloadIcon /> Download
+                </button>
+                <button
+                  onClick={() => {
+                    // Download all 3
+                    images.forEach((img, i) => {
+                      setTimeout(() => downloadImage(img, `flexbot-${lastGenName}-${i + 1}.png`), i * 300);
+                    });
+                  }}
+                  className="py-3 px-4 bg-surface-light text-white text-xs font-bold uppercase tracking-wider rounded-xl active:scale-[0.98] transition"
+                >
+                  All
+                </button>
+              </div>
+            </>
+          )}
         </div>
+      )}
 
-        {/* Right side stats */}
-        <div className="absolute right-4 sm:right-10 top-28 sm:top-32 z-20 hidden lg:block">
-          <div className="flex gap-12 text-[10px] font-mono">
-            <div>
-              <span className="font-bold text-black">&lt;35+&gt;</span>
-              <span className="ml-2 text-gray-700">Outfit choices</span>
-            </div>
-            <div>
-              <span className="font-bold text-black">&lt;38+&gt;</span>
-              <span className="ml-2 text-gray-700">Pose actions available</span>
-            </div>
-          </div>
-          <div className="mt-3 text-right">
-            <p className="text-[10px] text-gray-700 font-mono leading-relaxed max-w-[200px] ml-auto">
-              Quality that Withstands<br />
-              Time and Imagination
-            </p>
-          </div>
+      {/* Recent generations quick access */}
+      {gallery.length > 0 && !isLoading && images.length === 0 && (
+        <div>
+          <h3 className="text-sm font-bold mb-3 text-gray-400 uppercase tracking-wider">Recent</h3>
+          {gallery.slice(0, 3).map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setViewingItem(item); setViewingIndex(0); setTab('gallery'); }}
+              className="w-full flex items-center gap-3 p-3 bg-surface rounded-xl mb-2 text-left active:bg-surface-light transition"
+            >
+              <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                <img src={`data:image/png;base64,${item.images[0]}`} alt="" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate">{item.name}</p>
+                <p className="text-[10px] text-gray-500">{item.date} · {item.outfit}</p>
+              </div>
+              <ChevronIcon />
+            </button>
+          ))}
         </div>
+      )}
+    </div>
+  );
 
-        {/* ─── Bottom left: Headline ─── */}
-        <div className="px-5 sm:px-10 mt-8 sm:mt-12 relative z-20">
-          <div className="flex items-end gap-4 mb-2">
-            <div className="w-6 h-6 border border-black flex items-center justify-center">
-              <span className="text-[8px]">⚡</span>
-            </div>
-            <div className="h-px bg-black flex-1 max-w-[60px]" />
-          </div>
+  // ═══════════════════════════════════════
+  // GALLERY SCREEN
+  // ═══════════════════════════════════════
+  const renderGallery = () => (
+    <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 80px)' }}>
+      <h1 className="text-2xl font-bold mb-1">Gallery</h1>
+      <p className="text-xs text-gray-500 mb-5">Past generations</p>
 
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black leading-tight max-w-lg">
-            Your Ultimate Flex<br />
-            Against the Ordinary
-          </h1>
-
-          <p className="text-[10px] sm:text-xs text-gray-800 mt-4 max-w-sm leading-relaxed font-mono">
-            ***When the moment calls for greatness......there&apos;s no room for
-            compromise on style and presence.////
-          </p>
-
+      {/* Viewing a specific item */}
+      {viewingItem && (
+        <div className="mb-6">
           <button
-            onClick={() => setShowForm(true)}
-            className="mt-6 px-5 py-2.5 bg-black text-white text-[10px] sm:text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all inline-flex items-center gap-2"
+            onClick={() => setViewingItem(null)}
+            className="text-xs text-accent font-semibold mb-3 flex items-center gap-1"
           >
-            Generate now //
+            ← Back to all
           </button>
-        </div>
 
-        {/* Mobile thumbnail row */}
-        {images.length > 0 && (
-          <div className="px-5 mt-6 lg:hidden">
-            <div className="grid grid-cols-3 gap-2">
-              {images.map((img, idx) => (
+          <div className="bg-surface rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-base font-bold">{viewingItem.name}</h3>
+                <p className="text-[10px] text-gray-500">{viewingItem.date} · {viewingItem.outfit} · {viewingItem.scene}</p>
+              </div>
+              <button
+                onClick={() => deleteGalleryItem(viewingItem.id)}
+                className="text-xs text-red-400 font-semibold px-2 py-1"
+              >
+                Delete
+              </button>
+            </div>
+
+            <div className="rounded-xl overflow-hidden mb-3">
+              <img
+                src={`data:image/png;base64,${viewingItem.images[viewingIndex]}`}
+                alt={viewingItem.name}
+                className="w-full block"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {viewingItem.images.map((img, idx) => (
                 <button
                   key={idx}
-                  onClick={() => setSelectedIndex(idx)}
-                  className={`aspect-square border-2 rounded overflow-hidden transition ${
-                    selectedIndex === idx ? 'border-black' : 'border-gray-300'
+                  onClick={() => setViewingIndex(idx)}
+                  className={`aspect-square rounded-lg overflow-hidden border-2 transition ${
+                    viewingIndex === idx ? 'border-accent' : 'border-transparent'
                   }`}
                 >
                   <img src={`data:image/png;base64,${img}`} alt="" className="w-full h-full object-cover" />
@@ -256,166 +386,189 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Download / Share */}
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2">
+              <button
+                onClick={() => downloadImage(viewingItem.images[viewingIndex], `flexbot-${viewingItem.name}-${viewingIndex + 1}.png`)}
+                className="flex-1 py-3 bg-accent text-white text-xs font-bold uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition"
+              >
+                <DownloadIcon /> Download
+              </button>
               <button
                 onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = `data:image/png;base64,${images[selectedIndex]}`;
-                  link.download = `flexbot-${selectedIndex + 1}.png`;
-                  link.click();
+                  viewingItem.images.forEach((img, i) => {
+                    setTimeout(() => downloadImage(img, `flexbot-${viewingItem.name}-${i + 1}.png`), i * 300);
+                  });
                 }}
-                className="flex-1 py-2.5 bg-black text-white text-[10px] font-bold uppercase tracking-widest"
+                className="py-3 px-4 bg-surface-light text-white text-xs font-bold uppercase tracking-wider rounded-xl active:scale-[0.98] transition"
               >
-                ↓ Download
-              </button>
-              <button
-                onClick={async () => {
-                  if (!navigator.share) return alert('Share not supported');
-                  const bin = atob(images[selectedIndex]);
-                  const bytes = new Uint8Array(bin.length);
-                  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-                  const blob = new Blob([bytes], { type: 'image/png' });
-                  const file = new File([blob], `flexbot-${selectedIndex + 1}.png`, { type: 'image/png' });
-                  await navigator.share({ title: 'FlexBot', text: caption, files: [file] });
-                }}
-                className="flex-1 py-2.5 border-2 border-black text-[10px] font-bold uppercase tracking-widest"
-              >
-                ⤴ Share
+                All
               </button>
             </div>
-          </div>
-        )}
-
-        {/* Caption */}
-        {images.length > 0 && (
-          <div className="px-5 sm:px-10 mt-6">
-            <div className="max-w-xl border-t border-black pt-4">
-              <p className="text-[10px] sm:text-xs font-mono text-gray-700 leading-relaxed whitespace-pre-wrap">{caption}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Bottom right: Info cards */}
-        <div className="absolute right-4 sm:right-10 bottom-8 sm:bottom-12 z-20 hidden lg:flex gap-4">
-          {/* Info card 1 */}
-          <div className="w-48 border-2 border-black bg-white p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-5 h-5 border border-black rounded-full flex items-center justify-center text-[8px]">✦</div>
-              <span className="text-[8px] font-mono text-black">FLEXBOT</span>
-            </div>
-            <p className="text-[10px] font-bold leading-tight">
-              Unyielding<br />
-              Creation,<br />
-              Uncompromising<br />
-              Style
-            </p>
-          </div>
-          {/* Info card 2 */}
-          <div className="w-36 border-2 border-black bg-white overflow-hidden">
-            {images.length > 0 ? (
-              <img
-                src={`data:image/png;base64,${images[(selectedIndex + 1) % images.length]}`}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="h-full bg-gray-100 flex items-center justify-center p-4">
-                <p className="text-[10px] font-mono text-black text-center">Preview</p>
-              </div>
-            )}
           </div>
         </div>
+      )}
 
-        {/* Year badge */}
-        <div className="absolute right-4 sm:right-10 bottom-1/3 z-20 hidden lg:block">
-          <span className="text-3xl font-black text-gray-200">2026</span>
+      {/* Gallery list */}
+      {!viewingItem && (
+        <>
+          {gallery.length === 0 && (
+            <div className="text-center py-16">
+              <div className="text-5xl mb-4">📸</div>
+              <p className="text-sm text-gray-500">No generations yet</p>
+              <p className="text-xs text-gray-600 mt-1">Go to Home and create your first flex</p>
+            </div>
+          )}
+
+          {gallery.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setViewingItem(item); setViewingIndex(0); }}
+              className="w-full flex items-center gap-3 p-3 bg-surface rounded-xl mb-2 text-left active:bg-surface-light transition"
+            >
+              <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                <img src={`data:image/png;base64,${item.images[0]}`} alt="" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate">{item.name}</p>
+                <p className="text-[10px] text-gray-500">{item.date}</p>
+                <p className="text-[10px] text-gray-600">{item.outfit} · {item.scene}</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className="text-[10px] text-gray-500">{item.images.length} photos</span>
+                <ChevronIcon />
+              </div>
+            </button>
+          ))}
+        </>
+      )}
+    </div>
+  );
+
+  // ═══════════════════════════════════════
+  // PROFILE SCREEN
+  // ═══════════════════════════════════════
+  const renderProfile = () => (
+    <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 80px)' }}>
+      {/* User header */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-16 h-16 bg-surface rounded-full flex items-center justify-center">
+          <span className="text-2xl">💰</span>
+        </div>
+        <div>
+          <h1 className="text-xl font-bold">Premeditated Millionaire</h1>
+          <p className="text-xs text-gray-500">FlexBot User</p>
         </div>
       </div>
 
-      {/* ─── Form Slide-over ─── */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowForm(false)} />
-          <div className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white border-l-2 border-black overflow-y-auto">
-            <div className="p-6 sm:p-8">
-              <div className="flex justify-between items-center mb-8">
-                <div>
-                  <h2 className="text-xl font-black uppercase tracking-wider">Generate</h2>
-                  <p className="text-[10px] text-gray-800 font-mono mt-1">AI FLEX GENERATOR</p>
-                </div>
-                <button onClick={() => setShowForm(false)} className="text-2xl font-bold hover:opacity-60 transition">×</button>
-              </div>
+      {/* Quick actions */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <button
+          onClick={() => setTab('gallery')}
+          className="bg-surface rounded-2xl p-4 flex flex-col items-center gap-2"
+        >
+          <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center">
+            <GalleryIcon active={false} />
+          </div>
+          <span className="text-[10px] font-semibold">Gallery</span>
+        </button>
+        <button
+          onClick={() => {
+            // Download all gallery images
+            gallery.forEach((item) => {
+              item.images.forEach((img, i) => {
+                setTimeout(() => downloadImage(img, `flexbot-${item.name}-${i + 1}.png`), i * 300);
+              });
+            });
+          }}
+          className="bg-surface rounded-2xl p-4 flex flex-col items-center gap-2"
+        >
+          <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center">
+            <DownloadIcon />
+          </div>
+          <span className="text-[10px] font-semibold">Downloads</span>
+        </button>
+        <button className="bg-surface rounded-2xl p-4 flex flex-col items-center gap-2">
+          <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </svg>
+          </div>
+          <span className="text-[10px] font-semibold">Favorites</span>
+        </button>
+      </div>
 
-              <FlexForm onGenerate={handleGenerate} isLoading={isLoading} progress={progress} />
-
-              {/* Desktop Action Buttons */}
-              {images.length > 0 && (
-                <div className="mt-6 space-y-2">
-                  <button
-                    onClick={() => {
-                      const link = document.createElement('a');
-                      link.href = `data:image/png;base64,${images[selectedIndex]}`;
-                      link.download = `flexbot-${selectedIndex + 1}.png`;
-                      link.click();
-                    }}
-                    className="w-full py-3 bg-black text-white text-[10px] font-bold uppercase tracking-widest hover:bg-gray-800 transition"
-                  >
-                    ↓ Download
-                  </button>
-                  <button
-                    onClick={async () => {
-                      if (!navigator.share) return alert('Share not supported');
-                      const bin = atob(images[selectedIndex]);
-                      const bytes = new Uint8Array(bin.length);
-                      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-                      const blob = new Blob([bytes], { type: 'image/png' });
-                      const file = new File([blob], `flexbot-${selectedIndex + 1}.png`, { type: 'image/png' });
-                      await navigator.share({ title: 'FlexBot', text: caption, files: [file] });
-                    }}
-                    className="w-full py-3 border-2 border-black text-[10px] font-bold uppercase tracking-widest hover:bg-gray-50 transition"
-                  >
-                    ⤴ Share
-                  </button>
-                </div>
-              )}
-
-              {/* Stats */}
-              <div className="mt-8 pt-6 border-t-2 border-black space-y-2 text-[10px] font-mono">
-                <div className="flex justify-between"><span>OUTFITS</span><span className="font-bold">35+</span></div>
-                <div className="flex justify-between"><span>SCENES</span><span className="font-bold">33+</span></div>
-                <div className="flex justify-between"><span>POSES</span><span className="font-bold">38+</span></div>
-              </div>
-            </div>
+      {/* Stats */}
+      <div className="bg-surface rounded-2xl p-5 mb-6">
+        <h3 className="text-sm font-bold mb-4 text-gray-400 uppercase tracking-wider">Your Stats</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-2xl font-black text-accent">{totalGenerated}</p>
+            <p className="text-[10px] text-gray-500">Images Generated</p>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-accent">{gallery.length}</p>
+            <p className="text-[10px] text-gray-500">Sessions</p>
+          </div>
+          <div className="col-span-2">
+            <p className="text-sm font-bold">{topCeleb}</p>
+            <p className="text-[10px] text-gray-500">Most Flexed</p>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* ─── Contact Modal ─── */}
-      {showContact && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-black max-w-sm w-full p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-black uppercase">Contact</h2>
-              <button onClick={() => setShowContact(false)} className="text-2xl font-bold hover:opacity-60">×</button>
-            </div>
-            <div className="space-y-4 text-sm">
-              <div>
-                <p className="text-[10px] font-bold uppercase mb-1">Email</p>
-                <a href="mailto:contact@flexbot.com" className="text-blue-600 hover:underline font-mono text-xs">contact@flexbot.com</a>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase mb-1">Discord</p>
-                <a href="https://discord.gg/flexbot" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-mono text-xs">Join Discord →</a>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase mb-1">GitHub</p>
-                <a href="https://github.com/darshytwan" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-mono text-xs">@darshytwan</a>
-              </div>
-            </div>
-          </div>
+      {/* Menu items */}
+      <div className="bg-surface rounded-2xl overflow-hidden mb-6">
+        <MenuItem label="Settings" icon="⚙️" />
+        <MenuItem label="Share FlexBot" icon="📤" />
+        <MenuItem label="Discord Community" icon="💬" />
+        <MenuItem label="About" icon="ℹ️" />
+      </div>
+
+      {/* Version */}
+      <p className="text-center text-[10px] text-gray-600 mt-4">FlexBot v2.0 — Premeditated Millionaire</p>
+    </div>
+  );
+
+  return (
+    <main className="min-h-screen bg-dark relative max-w-md mx-auto">
+      {/* Screen content */}
+      <div className="pt-safe">
+        {tab === 'home' && renderHome()}
+        {tab === 'gallery' && renderGallery()}
+        {tab === 'profile' && renderProfile()}
+      </div>
+
+      {/* ─── Bottom Navigation Bar ─── */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-lg border-t border-surface-lighter z-50">
+        <div className="max-w-md mx-auto flex justify-around items-center py-2 pb-safe">
+          <TabButton icon={<HomeIcon active={tab === 'home'} />} label="Home" active={tab === 'home'} onClick={() => setTab('home')} />
+          <TabButton icon={<GalleryIcon active={tab === 'gallery'} />} label="Gallery" active={tab === 'gallery'} onClick={() => { setTab('gallery'); setViewingItem(null); }} />
+          <TabButton icon={<ProfileIcon active={tab === 'profile'} />} label="Profile" active={tab === 'profile'} onClick={() => setTab('profile')} />
         </div>
-      )}
+      </nav>
     </main>
+  );
+}
+
+// ─── Sub-components ───
+
+function TabButton({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="flex flex-col items-center gap-1 py-1 px-6 transition">
+      {icon}
+      <span className={`text-[10px] font-semibold ${active ? 'text-accent' : 'text-gray-500'}`}>{label}</span>
+    </button>
+  );
+}
+
+function MenuItem({ label, icon }: { label: string; icon: string }) {
+  return (
+    <div className="flex items-center justify-between px-5 py-4 border-b border-surface-lighter last:border-0">
+      <div className="flex items-center gap-3">
+        <span>{icon}</span>
+        <span className="text-sm">{label}</span>
+      </div>
+      <ChevronIcon />
+    </div>
   );
 }

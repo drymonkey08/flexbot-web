@@ -1,7 +1,7 @@
 {
   "name": "FlexBot — Premeditated Millionaire",
   "short_name": "FlexBot",
-  "description": "Generate hyper-realistic AI flex photos on your iPhone",
+  "description": "Generate hyper-realistic AI flex photos",
   "start_url": "/",
   "display": "standalone",
   "scope": "/",
@@ -26,14 +26,6 @@
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/icon.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow"
     }
   ]
 }

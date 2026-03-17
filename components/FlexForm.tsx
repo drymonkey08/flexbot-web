@@ -41,30 +41,30 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
     });
   };
 
+  const selectClass =
+    'w-full px-4 py-3 text-sm bg-surface-light border border-surface-lighter rounded-xl text-white font-medium focus:border-accent focus:ring-1 focus:ring-accent appearance-none cursor-pointer';
+  const labelClass = 'block text-xs font-semibold uppercase tracking-wider mb-2 text-gray-400';
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-xs font-bold uppercase mb-2 text-black">Figure Name</label>
+        <label className={labelClass}>Who&apos;s Flexing?</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Einstein, Curry..."
+          placeholder="e.g. Steph Curry, Einstein..."
           required
-          className="w-full px-4 py-3 text-sm bg-white border-2 border-black text-black placeholder-gray-500 font-medium focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+          className="w-full px-4 py-3 text-sm bg-surface-light border border-surface-lighter rounded-xl text-white placeholder-gray-500 font-medium focus:border-accent focus:ring-1 focus:ring-accent"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-bold uppercase mb-2 text-black">Outfit</label>
-        <select
-          value={outfitKey}
-          onChange={(e) => setOutfitKey(e.target.value)}
-          className="w-full px-4 py-3 text-sm bg-white border-2 border-black text-black font-medium focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 appearance-none cursor-pointer"
-        >
-          <option value="" className="text-black">Random</option>
-          {Object.entries(OUTFITS).map(([key]) => (
-            <option key={key} value={key} className="text-black">
+        <label className={labelClass}>Outfit</label>
+        <select value={outfitKey} onChange={(e) => setOutfitKey(e.target.value)} className={selectClass}>
+          <option value="">Random</option>
+          {Object.keys(OUTFITS).map((key) => (
+            <option key={key} value={key}>
               {key.replace(/_/g, ' ').toUpperCase()}
             </option>
           ))}
@@ -72,15 +72,11 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
       </div>
 
       <div>
-        <label className="block text-xs font-bold uppercase mb-2 text-black">Scene</label>
-        <select
-          value={sceneKey}
-          onChange={(e) => setSceneKey(e.target.value)}
-          className="w-full px-4 py-3 text-sm bg-white border-2 border-black text-black font-medium focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 appearance-none cursor-pointer"
-        >
-          <option value="" className="text-black">Random</option>
-          {Object.entries(SCENES).map(([key]) => (
-            <option key={key} value={key} className="text-black">
+        <label className={labelClass}>Scene</label>
+        <select value={sceneKey} onChange={(e) => setSceneKey(e.target.value)} className={selectClass}>
+          <option value="">Random</option>
+          {Object.keys(SCENES).map((key) => (
+            <option key={key} value={key}>
               {key.replace(/_/g, ' ').toUpperCase()}
             </option>
           ))}
@@ -88,53 +84,47 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
       </div>
 
       <div>
-        <label className="block text-xs font-bold uppercase mb-2 text-black">Pose</label>
-        <select
-          value={poseKey}
-          onChange={(e) => setPoseKey(e.target.value)}
-          className="w-full px-4 py-3 text-sm bg-white border-2 border-black text-black font-medium focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 appearance-none cursor-pointer"
-        >
-          <option value="" className="text-black">Random</option>
-          {Object.entries(POSES).map(([key]) => (
-            <option key={key} value={key} className="text-black">
+        <label className={labelClass}>Pose</label>
+        <select value={poseKey} onChange={(e) => setPoseKey(e.target.value)} className={selectClass}>
+          <option value="">Random</option>
+          {Object.keys(POSES).map((key) => (
+            <option key={key} value={key}>
               {key.replace(/_/g, ' ').toUpperCase()}
             </option>
           ))}
         </select>
       </div>
 
-      <div className="pt-2">
-        <button
-          type="button"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-xs font-bold uppercase tracking-widest text-black hover:opacity-60 transition"
-        >
-          {showAdvanced ? '▼' : '▶'} Advanced
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => setShowAdvanced(!showAdvanced)}
+        className="text-xs font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition"
+      >
+        {showAdvanced ? '▾' : '▸'} Advanced Options
+      </button>
 
       {showAdvanced && (
-        <div className="space-y-4 p-4 bg-gray-100 border-2 border-black">
+        <div className="space-y-3 p-4 bg-surface rounded-xl border border-surface-lighter">
           <textarea
             value={customOutfit}
             onChange={(e) => setCustomOutfit(e.target.value)}
-            placeholder="Custom outfit..."
+            placeholder="Custom outfit description..."
             rows={2}
-            className="w-full px-3 py-2 text-sm border-2 border-black bg-white text-black placeholder-gray-500 focus:outline-none resize-none font-medium"
+            className="w-full px-3 py-2 text-sm bg-surface-light border border-surface-lighter rounded-lg text-white placeholder-gray-500 resize-none"
           />
           <textarea
             value={customPose}
             onChange={(e) => setCustomPose(e.target.value)}
-            placeholder="Custom pose..."
+            placeholder="Custom pose description..."
             rows={2}
-            className="w-full px-3 py-2 text-sm border-2 border-black bg-white text-black placeholder-gray-500 focus:outline-none resize-none font-medium"
+            className="w-full px-3 py-2 text-sm bg-surface-light border border-surface-lighter rounded-lg text-white placeholder-gray-500 resize-none"
           />
           <textarea
             value={customPrompt}
             onChange={(e) => setCustomPrompt(e.target.value)}
-            placeholder="Full custom prompt..."
+            placeholder="Full custom prompt override..."
             rows={3}
-            className="w-full px-3 py-2 text-sm border-2 border-black bg-white text-black placeholder-gray-500 focus:outline-none resize-none font-medium"
+            className="w-full px-3 py-2 text-sm bg-surface-light border border-surface-lighter rounded-lg text-white placeholder-gray-500 resize-none"
           />
         </div>
       )}
@@ -142,9 +132,9 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
       <button
         type="submit"
         disabled={isLoading || !name.trim()}
-        className="w-full py-3 bg-black text-white text-xs font-black uppercase tracking-widest disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-gray-900 transition border-2 border-black"
+        className="w-full py-4 bg-accent text-white text-sm font-bold uppercase tracking-widest rounded-xl disabled:bg-surface-lighter disabled:text-gray-500 disabled:cursor-not-allowed hover:bg-accent-dark transition-all active:scale-[0.98]"
       >
-        {isLoading ? `⚡ Generating ${progress}/3` : '⚡ Generate'}
+        {isLoading ? `Generating... ${progress}/3` : 'Generate Flex'}
       </button>
     </form>
   );
