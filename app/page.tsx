@@ -55,9 +55,10 @@ function downloadImage(base64: string, filename: string) {
 export default function Home() {
   const [tab, setTab] = useState<Tab>('home');
   const [images, setImages] = useState<string[]>([]);
-  const [, setCaption] = useState('');
+  const [caption, setCaption] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [viewingItem, setViewingItem] = useState<GalleryItem | null>(null);
@@ -81,8 +82,14 @@ export default function Home() {
     if (!name.trim()) return;
     setIsLoading(true);
     setProgress(0);
+    setError('');
     setImages([]);
     setCaption('');
+
+    // Simulate progress: 0 → 1 at ~10s, 1 → 2 at ~25s, 2 → 3 when done
+    const progressTimer = setInterval(() => {
+      setProgress(prev => (prev < 2 ? prev + 1 : prev));
+    }, 12000);
 
     try {
       const response = await fetch('/api/generate', {
@@ -102,6 +109,7 @@ export default function Home() {
         throw new Error(err.error || 'Generation failed');
       }
       const result: GenerateResponse = await response.json();
+      clearInterval(progressTimer);
       setImages(result.images);
       setCaption(result.caption);
       setProgress(3);
@@ -124,8 +132,9 @@ export default function Home() {
         return updated;
       });
     } catch (err) {
+      clearInterval(progressTimer);
       console.error('Generate error:', err);
-      alert(err instanceof Error ? err.message : 'Generation failed');
+      setError(err instanceof Error ? err.message : 'Generation failed. Try again.');
     } finally {
       setIsLoading(false);
     }
@@ -176,6 +185,7 @@ export default function Home() {
 
       {/* Category Cards — 3x2 grid, tappable to open picker */}
       <div className="grid grid-cols-3 gap-2.5 mb-5">
+        {/* Outfits */}
         <button
           onClick={() => { setShowOptions(true); setActiveOption('outfit'); }}
           className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
@@ -183,12 +193,14 @@ export default function Home() {
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-4xl">👔</span>
           </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
           <div className="relative z-20">
             <span className="text-xs font-semibold text-white">Outfits</span>
             {outfitKey && <p className="text-[9px] text-gray-400 truncate">{outfitKey.replace(/_/g, ' ')}</p>}
           </div>
         </button>
 
+        {/* Pants */}
         <button
           onClick={() => { setShowOptions(true); setActiveOption('pants'); }}
           className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
@@ -196,12 +208,14 @@ export default function Home() {
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-4xl">👖</span>
           </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
           <div className="relative z-20">
             <span className="text-xs font-semibold text-white">Pants</span>
             {pantsKey && <p className="text-[9px] text-gray-400 truncate">{pantsKey.replace(/_/g, ' ')}</p>}
           </div>
         </button>
 
+        {/* Shoes */}
         <button
           onClick={() => { setShowOptions(true); setActiveOption('shoes'); }}
           className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
@@ -209,12 +223,14 @@ export default function Home() {
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-4xl">👟</span>
           </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
           <div className="relative z-20">
             <span className="text-xs font-semibold text-white">Shoes</span>
             {shoesKey && <p className="text-[9px] text-gray-400 truncate">{shoesKey.replace(/_/g, ' ')}</p>}
           </div>
         </button>
 
+        {/* Scenes */}
         <button
           onClick={() => { setShowOptions(true); setActiveOption('scene'); }}
           className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
@@ -222,12 +238,14 @@ export default function Home() {
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-4xl">🏙️</span>
           </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
           <div className="relative z-20">
             <span className="text-xs font-semibold text-white">Scenes</span>
             {sceneKey && <p className="text-[9px] text-gray-400 truncate">{sceneKey.replace(/_/g, ' ')}</p>}
           </div>
         </button>
 
+        {/* Poses */}
         <button
           onClick={() => { setShowOptions(true); setActiveOption('pose'); }}
           className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
@@ -235,95 +253,73 @@ export default function Home() {
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-4xl">💪</span>
           </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
           <div className="relative z-20">
             <span className="text-xs font-semibold text-white">Poses</span>
             {poseKey && <p className="text-[9px] text-gray-400 truncate">{poseKey.replace(/_/g, ' ')}</p>}
           </div>
         </button>
 
+        {/* Generate — red glow accent card */}
         <button
-          onClick={() => document.getElementById('name-input')?.focus()}
-          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden cursor-pointer border border-accent/30 text-left active:scale-[0.97] transition"
+          onClick={() => name.trim() ? handleGenerate() : document.getElementById('name-input')?.focus()}
+          className="rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden cursor-pointer text-left active:scale-[0.97] transition"
+          style={{ background: '#111', boxShadow: 'inset 0 0 20px rgba(229,57,53,0.25), 0 0 0 1px rgba(229,57,53,0.3)' }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-accent/15 via-transparent to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-accent/30 via-accent/5 to-transparent z-10" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl">⚡</span>
+            <span className="text-4xl drop-shadow-[0_0_8px_rgba(229,57,53,0.8)]">⚡</span>
           </div>
           <div className="relative z-20">
-            <span className="text-xs font-semibold text-white">Generate</span>
+            <span className="text-xs font-bold text-white">Generate</span>
           </div>
         </button>
       </div>
 
-      {/* Options picker — opens when a card is tapped */}
+      {/* Options picker — scrollable pill buttons */}
       {showOptions && (
         <div className="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-200">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold text-gray-900 uppercase tracking-wider">
               {activeOption === 'outfit' ? 'Choose Outfit' : activeOption === 'scene' ? 'Choose Scene' : activeOption === 'pose' ? 'Choose Pose' : activeOption === 'pants' ? 'Choose Pants' : 'Choose Shoes'}
             </span>
-            <button onClick={() => setShowOptions(false)} className="text-xs text-accent font-semibold">Done</button>
+            <button onClick={() => setShowOptions(false)} className="text-xs text-accent font-bold">Done</button>
           </div>
-          {activeOption === 'outfit' && (
-            <select
-              value={outfitKey}
-              onChange={(e) => setOutfitKey(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-900 appearance-none cursor-pointer"
-            >
-              <option value="">Random</option>
-              {Object.keys(OUTFITS).map((key) => (
-                <option key={key} value={key}>{key.replace(/_/g, ' ').toUpperCase()}</option>
-              ))}
-            </select>
-          )}
-          {activeOption === 'pants' && (
-            <select
-              value={pantsKey}
-              onChange={(e) => setPantsKey(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-900 appearance-none cursor-pointer"
-            >
-              <option value="">Random</option>
-              {Object.keys(PANTS).map((key) => (
-                <option key={key} value={key}>{key.replace(/_/g, ' ').toUpperCase()}</option>
-              ))}
-            </select>
-          )}
-          {activeOption === 'shoes' && (
-            <select
-              value={shoesKey}
-              onChange={(e) => setShoesKey(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-900 appearance-none cursor-pointer"
-            >
-              <option value="">Random</option>
-              {Object.keys(SHOES).map((key) => (
-                <option key={key} value={key}>{key.replace(/_/g, ' ').toUpperCase()}</option>
-              ))}
-            </select>
-          )}
-          {activeOption === 'scene' && (
-            <select
-              value={sceneKey}
-              onChange={(e) => setSceneKey(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-900 appearance-none cursor-pointer"
-            >
-              <option value="">Random</option>
-              {Object.keys(SCENES).map((key) => (
-                <option key={key} value={key}>{key.replace(/_/g, ' ').toUpperCase()}</option>
-              ))}
-            </select>
-          )}
-          {activeOption === 'pose' && (
-            <select
-              value={poseKey}
-              onChange={(e) => setPoseKey(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-900 appearance-none cursor-pointer"
-            >
-              <option value="">Random</option>
-              {Object.keys(POSES).map((key) => (
-                <option key={key} value={key}>{key.replace(/_/g, ' ').toUpperCase()}</option>
-              ))}
-            </select>
-          )}
+          <PillPicker
+            options={
+              activeOption === 'outfit' ? Object.keys(OUTFITS) :
+              activeOption === 'pants' ? Object.keys(PANTS) :
+              activeOption === 'shoes' ? Object.keys(SHOES) :
+              activeOption === 'scene' ? Object.keys(SCENES) :
+              Object.keys(POSES)
+            }
+            value={
+              activeOption === 'outfit' ? outfitKey :
+              activeOption === 'pants' ? pantsKey :
+              activeOption === 'shoes' ? shoesKey :
+              activeOption === 'scene' ? sceneKey :
+              poseKey
+            }
+            onChange={(val) => {
+              if (activeOption === 'outfit') setOutfitKey(val);
+              else if (activeOption === 'pants') setPantsKey(val);
+              else if (activeOption === 'shoes') setShoesKey(val);
+              else if (activeOption === 'scene') setSceneKey(val);
+              else setPoseKey(val);
+            }}
+          />
+        </div>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between">
+          <p className="text-xs text-red-600 font-medium">{error}</p>
+          <button onClick={() => setError('')} className="text-red-400 ml-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
       )}
 
@@ -332,18 +328,25 @@ export default function Home() {
         <button
           onClick={handleGenerate}
           disabled={isLoading}
-          className="w-full py-4 bg-accent text-white text-sm font-bold rounded-2xl mb-5 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-dark active:scale-[0.98] transition-all"
+          className={`w-full py-4 bg-accent text-white text-sm font-bold rounded-2xl mb-3 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all relative overflow-hidden ${!isLoading ? 'btn-shimmer' : ''}`}
         >
-          {isLoading ? `Generating... ${progress}/3` : 'Generate Flex ⚡'}
+          {isLoading ? 'Generating...' : 'Generate Flex ⚡'}
         </button>
       )}
 
-      {/* Loading state */}
+      {/* Loading state with progress bar */}
       {isLoading && !images.length && (
         <div className="bg-gray-50 rounded-2xl p-6 mb-4 flex flex-col items-center justify-center border border-gray-200" style={{ minHeight: 200 }}>
-          <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-xs text-gray-500">Creating {name}&apos;s flex photos...</p>
-          <p className="text-[10px] text-gray-400 mt-1">This takes 30-45 seconds</p>
+          <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin mb-4" />
+          <p className="text-xs font-semibold text-gray-900 mb-1">Creating {name}&apos;s flex photos...</p>
+          <p className="text-[10px] text-gray-400 mb-4">This takes 30–45 seconds</p>
+          <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-accent h-1.5 rounded-full transition-all duration-[3000ms] ease-out"
+              style={{ width: `${(progress / 3) * 100}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-gray-400 mt-2">{progress}/3 images</p>
         </div>
       )}
 
@@ -370,11 +373,12 @@ export default function Home() {
             </div>
             <div className="px-4 py-3">
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900">{name}</p>
                   <p className="text-[10px] text-gray-500 mt-0.5">
                     {outfitKey ? outfitKey.replace(/_/g, ' ') : 'Random outfit'} · Photo {selectedIndex + 1}/3
                   </p>
+                  {caption && <p className="text-[10px] text-gray-400 mt-0.5 truncate">{caption}</p>}
                 </div>
                 <button
                   onClick={() => {
@@ -695,10 +699,39 @@ export default function Home() {
 
 function BottomTab({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="flex flex-col items-center gap-0.5 py-1 px-5 transition active:opacity-70">
+    <button onClick={onClick} className="flex flex-col items-center gap-0.5 py-1 px-5 transition active:opacity-70 relative">
+      {active && (
+        <span className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-accent" />
+      )}
       {icon}
       <span className={`text-[10px] font-medium ${active ? 'text-accent' : 'text-gray-400'}`}>{label}</span>
     </button>
+  );
+}
+
+function PillPicker({ options, value, onChange }: { options: string[]; value: string; onChange: (val: string) => void }) {
+  return (
+    <div className="pill-scroll">
+      <button
+        onClick={() => onChange('')}
+        className={`flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border transition whitespace-nowrap ${
+          value === '' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200'
+        }`}
+      >
+        Random
+      </button>
+      {options.map((key) => (
+        <button
+          key={key}
+          onClick={() => onChange(key)}
+          className={`flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border transition whitespace-nowrap ${
+            value === key ? 'bg-accent text-white border-accent' : 'bg-white text-gray-700 border-gray-200'
+          }`}
+        >
+          {key.replace(/_/g, ' ')}
+        </button>
+      ))}
+    </div>
   );
 }
 
