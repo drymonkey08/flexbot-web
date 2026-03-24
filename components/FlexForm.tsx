@@ -12,6 +12,7 @@ interface FlexFormProps {
     customOutfit?: string;
     customPose?: string;
     customPrompt?: string;
+    chainEnabled: boolean;
   }) => Promise<void>;
   isLoading: boolean;
   progress: number;
@@ -22,6 +23,7 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
   const [outfitKey, setOutfitKey] = useState('');
   const [sceneKey, setSceneKey] = useState('');
   const [poseKey, setPoseKey] = useState('');
+  const [chainEnabled, setChainEnabled] = useState(true);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [customOutfit, setCustomOutfit] = useState('');
   const [customPose, setCustomPose] = useState('');
@@ -38,6 +40,7 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
       customOutfit: customOutfit || undefined,
       customPose: customPose || undefined,
       customPrompt: customPrompt || undefined,
+      chainEnabled,
     });
   };
 
@@ -93,6 +96,33 @@ export default function FlexForm({ onGenerate, isLoading, progress }: FlexFormPr
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Chain Toggle */}
+      <div className="flex items-center justify-between px-4 py-3 bg-surface-light border border-surface-lighter rounded-xl">
+        <div>
+          <p className="text-sm font-semibold text-white">
+            {chainEnabled ? '⛓️ Diamond Chain — ON' : '🚫 Chain — OFF'}
+          </p>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {chainEnabled
+              ? `Custom nameplate pendant with their last name`
+              : 'No chain or necklace in the photo'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setChainEnabled(!chainEnabled)}
+          className={`relative w-12 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${
+            chainEnabled ? 'bg-accent' : 'bg-surface-lighter'
+          }`}
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+              chainEnabled ? 'translate-x-6' : 'translate-x-0'
+            }`}
+          />
+        </button>
       </div>
 
       <button

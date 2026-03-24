@@ -4,15 +4,27 @@ export function buildPrompt(
   outfit: string,
   sceneDesc: string,
   pose: string,
-  photoNum: number
+  photoNum: number,
+  chainEnabled: boolean = true,
+  lastName: string = '',
+  tattoosEnabled: boolean = false
 ): string {
+  const chainLine = chainEnabled
+    ? `MANDATORY JEWELRY (always visible): heavy diamond-encrusted Cuban link chain with a large iced-out custom nameplate pendant spelling out "${lastName || personName.split(' ').pop()}" in block diamond letters hanging on chest, catching light with realistic sparkle. This chain and nameplate pendant must be clearly visible and legible in EVERY photo.`
+    : `NO chain or necklace jewelry. The neck and chest area should be clean with no chain, pendant, or necklace visible.`;
+
+  const tattooLine = tattoosEnabled
+    ? `TATTOOS (MANDATORY): ${personName} has full sleeve tattoos covering BOTH arms completely from shoulder to wrist — dense intricate black-and-grey and color tattoo artwork covering every inch of both arms with no skin showing through, plus prominent neck tattoos covering the sides and back of the neck. Tattoos must be photorealistic with visible ink texture, shading, and detail. They must show on any exposed skin area in every photo.`
+    : `No tattoos. Skin on arms and neck is clean and unmarked.`;
+
   return [
     `HYPER-PHOTOREALISTIC AI-generated candid photo — photo ${photoNum} of 3 from the same session, completely indistinguishable from a real iPhone photograph.`,
     `CRITICAL: Part of a 3-photo set taken in the EXACT SAME LOCATION without moving. Background, lighting, camera angle, and distance are IDENTICAL across all 3 — only the pose changes.`,
     `STYLE: This is a RAW STREET PHOTO, NOT an elegant portrait or studio photoshoot. It must look like a real candid photo someone took on their phone in the moment — gritty, authentic, unposed energy. Never clean, polished, or editorial. Think trap house, block, hood, parking lot energy.`,
     `Subject: ${personName} — rendered with 100% accurate likeness: exact face structure, skin tone, hair texture, body type, any known tattoos or distinguishing physical features. Must be instantly recognizable as ${personName}.`,
     `Outfit (IDENTICAL in all 3 photos, do not change): ${outfit}.`,
-    `MANDATORY JEWELRY (always visible): heavy diamond-encrusted Cuban link chain with a large diamond pendant hanging on chest, catching light with realistic sparkle. This chain and pendant must be visible in EVERY photo.`,
+    chainLine,
+    tattooLine,
     `Action for THIS photo only: ${pose}`,
     `Scene (IDENTICAL in all 3 photos): ${sceneDesc}.`,
     `Camera: shot on iPhone 15 Pro Max, vertical 4:5 portrait crop, full body head-to-toe visible in frame, medium distance shot, natural bokeh depth of field, slight natural sensor grain.`,
@@ -46,11 +58,14 @@ export function buildPromptsForGeneration(
   name: string,
   outfit: string,
   sceneDesc: string,
-  poses: [string, string, string]
+  poses: [string, string, string],
+  chainEnabled: boolean = true,
+  tattoosEnabled: boolean = false
 ): PromptOutput {
-  const prompt1 = buildPrompt(name, outfit, sceneDesc, poses[0], 1);
-  const prompt2 = buildPrompt(name, outfit, sceneDesc, poses[1], 2);
-  const prompt3 = buildPrompt(name, outfit, sceneDesc, poses[2], 3);
+  const lastName = name.trim().split(' ').pop() || name.trim();
+  const prompt1 = buildPrompt(name, outfit, sceneDesc, poses[0], 1, chainEnabled, lastName, tattoosEnabled);
+  const prompt2 = buildPrompt(name, outfit, sceneDesc, poses[1], 2, chainEnabled, lastName, tattoosEnabled);
+  const prompt3 = buildPrompt(name, outfit, sceneDesc, poses[2], 3, chainEnabled, lastName, tattoosEnabled);
 
   const caption = `💰 **${name.toUpperCase()}** — PREMEDITATED FLEX\n\nThis is what it looks like when you move different. 🔥\n\n#PremeditatedMillionaire #WealthMindset #MoneyMoves`;
 

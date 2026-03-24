@@ -71,6 +71,8 @@ export default function Home() {
   const [poseKey, setPoseKey] = useState('');
   const [pantsKey, setPantsKey] = useState('');
   const [shoesKey, setShoesKey] = useState('');
+  const [chainEnabled, setChainEnabled] = useState(true);
+  const [tattoosEnabled, setTattoosEnabled] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [activeOption, setActiveOption] = useState<'outfit' | 'scene' | 'pose' | 'pants' | 'shoes'>('outfit');
 
@@ -102,6 +104,8 @@ export default function Home() {
           poseKey: poseKey || undefined,
           pantsKey: pantsKey || undefined,
           shoesKey: shoesKey || undefined,
+          chainEnabled,
+          tattoosEnabled,
         }),
       });
       if (!response.ok) {
@@ -257,6 +261,44 @@ export default function Home() {
           <div className="relative z-20">
             <span className="text-xs font-semibold text-white">Poses</span>
             {poseKey && <p className="text-[9px] text-gray-400 truncate">{poseKey.replace(/_/g, ' ')}</p>}
+          </div>
+        </button>
+
+        {/* Chain Toggle card */}
+        <button
+          type="button"
+          onClick={() => setChainEnabled(!chainEnabled)}
+          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border cursor-pointer text-left active:scale-[0.97] transition"
+          style={{ borderColor: chainEnabled ? 'rgba(255,215,0,0.5)' : 'rgba(75,75,75,0.5)' }}
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl">{chainEnabled ? '⛓️' : '🚫'}</span>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
+          <div className="relative z-20">
+            <span className="text-xs font-semibold text-white">Chain</span>
+            <p className="text-[9px] truncate" style={{ color: chainEnabled ? '#ffd700' : '#9ca3af' }}>
+              {chainEnabled ? 'Last Name Pendant' : 'No Chain'}
+            </p>
+          </div>
+        </button>
+
+        {/* Tattoo Toggle card */}
+        <button
+          type="button"
+          onClick={() => setTattoosEnabled(!tattoosEnabled)}
+          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border cursor-pointer text-left active:scale-[0.97] transition"
+          style={{ borderColor: tattoosEnabled ? 'rgba(139,92,246,0.6)' : 'rgba(75,75,75,0.5)' }}
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl">{tattoosEnabled ? '🔱' : '🫧'}</span>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
+          <div className="relative z-20">
+            <span className="text-xs font-semibold text-white">Tattoos</span>
+            <p className="text-[9px] truncate" style={{ color: tattoosEnabled ? '#a78bfa' : '#9ca3af' }}>
+              {tattoosEnabled ? 'Full Sleeves + Neck' : 'Clean Skin'}
+            </p>
           </div>
         </button>
 
