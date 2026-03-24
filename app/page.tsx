@@ -364,8 +364,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Empty state (first-time hint) ── */}
-      {!isLoading && images.length === 0 && gallery.length === 0 && (
+      {/* ── Feature cards (shown whenever no active result) ── */}
+      {!isLoading && images.length === 0 && (
         <div className="mt-5 rounded-2xl overflow-hidden" style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div className="px-4 py-5">
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-4" style={{ color: 'rgba(240,235,224,0.25)' }}>What you get</p>
