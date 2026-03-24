@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { OUTFITS, SCENES, POSES, PANTS, SHOES } from '@/lib/data';
+import { OUTFITS, SCENES, POSES } from '@/lib/data';
 
 // ─── Types ───
 interface GenerateResponse {
@@ -69,12 +69,9 @@ export default function Home() {
   const [outfitKey, setOutfitKey] = useState('');
   const [sceneKey, setSceneKey] = useState('');
   const [poseKey, setPoseKey] = useState('');
-  const [pantsKey, setPantsKey] = useState('');
-  const [shoesKey, setShoesKey] = useState('');
-  const [chainEnabled, setChainEnabled] = useState(true);
   const [tattoosEnabled, setTattoosEnabled] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
-  const [activeOption, setActiveOption] = useState<'outfit' | 'scene' | 'pose' | 'pants' | 'shoes'>('outfit');
+  const [activeOption, setActiveOption] = useState<'outfit' | 'scene' | 'pose'>('outfit');
 
   useEffect(() => {
     setGallery(loadGallery());
@@ -102,9 +99,6 @@ export default function Home() {
           outfitKey: outfitKey || undefined,
           sceneKey: sceneKey || undefined,
           poseKey: poseKey || undefined,
-          pantsKey: pantsKey || undefined,
-          shoesKey: shoesKey || undefined,
-          chainEnabled,
           tattoosEnabled,
         }),
       });
@@ -204,36 +198,6 @@ export default function Home() {
           </div>
         </button>
 
-        {/* Pants */}
-        <button
-          onClick={() => { setShowOptions(true); setActiveOption('pants'); }}
-          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
-        >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl">👖</span>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
-          <div className="relative z-20">
-            <span className="text-xs font-semibold text-white">Pants</span>
-            {pantsKey && <p className="text-[9px] text-gray-400 truncate">{pantsKey.replace(/_/g, ' ')}</p>}
-          </div>
-        </button>
-
-        {/* Shoes */}
-        <button
-          onClick={() => { setShowOptions(true); setActiveOption('shoes'); }}
-          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
-        >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl">👟</span>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
-          <div className="relative z-20">
-            <span className="text-xs font-semibold text-white">Shoes</span>
-            {shoesKey && <p className="text-[9px] text-gray-400 truncate">{shoesKey.replace(/_/g, ' ')}</p>}
-          </div>
-        </button>
-
         {/* Scenes */}
         <button
           onClick={() => { setShowOptions(true); setActiveOption('scene'); }}
@@ -264,25 +228,6 @@ export default function Home() {
           </div>
         </button>
 
-        {/* Chain Toggle card */}
-        <button
-          type="button"
-          onClick={() => setChainEnabled(!chainEnabled)}
-          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border cursor-pointer text-left active:scale-[0.97] transition"
-          style={{ borderColor: chainEnabled ? 'rgba(255,215,0,0.5)' : 'rgba(75,75,75,0.5)' }}
-        >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl">{chainEnabled ? '⛓️' : '🚫'}</span>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
-          <div className="relative z-20">
-            <span className="text-xs font-semibold text-white">Chain</span>
-            <p className="text-[9px] truncate" style={{ color: chainEnabled ? '#ffd700' : '#9ca3af' }}>
-              {chainEnabled ? 'Last Name Pendant' : 'No Chain'}
-            </p>
-          </div>
-        </button>
-
         {/* Tattoo Toggle card */}
         <button
           type="button"
@@ -302,19 +247,15 @@ export default function Home() {
           </div>
         </button>
 
-        {/* Generate — red glow accent card */}
+        {/* Generate — spans 2 columns, red glow accent */}
         <button
           onClick={() => name.trim() ? handleGenerate() : document.getElementById('name-input')?.focus()}
-          className="rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden cursor-pointer text-left active:scale-[0.97] transition"
-          style={{ background: '#111', boxShadow: 'inset 0 0 20px rgba(229,57,53,0.25), 0 0 0 1px rgba(229,57,53,0.3)' }}
+          className="col-span-2 rounded-2xl p-3 flex items-center justify-center gap-2 relative overflow-hidden cursor-pointer active:scale-[0.98] transition"
+          style={{ background: '#111', boxShadow: 'inset 0 0 20px rgba(229,57,53,0.25), 0 0 0 1px rgba(229,57,53,0.3)', minHeight: '64px' }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-accent/30 via-accent/5 to-transparent z-10" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl drop-shadow-[0_0_8px_rgba(229,57,53,0.8)]">⚡</span>
-          </div>
-          <div className="relative z-20">
-            <span className="text-xs font-bold text-white">Generate</span>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-accent/20 via-accent/10 to-transparent z-10" />
+          <span className="relative z-20 text-2xl drop-shadow-[0_0_8px_rgba(229,57,53,0.8)]">⚡</span>
+          <span className="relative z-20 text-sm font-bold text-white tracking-wide">Generate</span>
         </button>
       </div>
 
@@ -323,29 +264,23 @@ export default function Home() {
         <div className="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-200">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold text-gray-900 uppercase tracking-wider">
-              {activeOption === 'outfit' ? 'Choose Outfit' : activeOption === 'scene' ? 'Choose Scene' : activeOption === 'pose' ? 'Choose Pose' : activeOption === 'pants' ? 'Choose Pants' : 'Choose Shoes'}
+              {activeOption === 'outfit' ? 'Choose Outfit' : activeOption === 'scene' ? 'Choose Scene' : 'Choose Pose'}
             </span>
             <button onClick={() => setShowOptions(false)} className="text-xs text-accent font-bold">Done</button>
           </div>
           <PillPicker
             options={
               activeOption === 'outfit' ? Object.keys(OUTFITS) :
-              activeOption === 'pants' ? Object.keys(PANTS) :
-              activeOption === 'shoes' ? Object.keys(SHOES) :
               activeOption === 'scene' ? Object.keys(SCENES) :
               Object.keys(POSES)
             }
             value={
               activeOption === 'outfit' ? outfitKey :
-              activeOption === 'pants' ? pantsKey :
-              activeOption === 'shoes' ? shoesKey :
               activeOption === 'scene' ? sceneKey :
               poseKey
             }
             onChange={(val) => {
               if (activeOption === 'outfit') setOutfitKey(val);
-              else if (activeOption === 'pants') setPantsKey(val);
-              else if (activeOption === 'shoes') setShoesKey(val);
               else if (activeOption === 'scene') setSceneKey(val);
               else setPoseKey(val);
             }}
@@ -402,6 +337,28 @@ export default function Home() {
                 alt={`${name} flex`}
                 className="w-full block"
               />
+              {/* Prev arrow */}
+              <button
+                onClick={() => setSelectedIndex(prev => (prev - 1 + images.length) % images.length)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              {/* Next arrow */}
+              <button
+                onClick={() => setSelectedIndex(prev => (prev + 1) % images.length)}
+                className="absolute right-12 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+              {/* Photo counter badge */}
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1">
+                <span className="text-white text-[10px] font-semibold">{selectedIndex + 1} / {images.length}</span>
+              </div>
               <button
                 onClick={() => downloadImage(images[selectedIndex], `flexbot-${name}-${selectedIndex + 1}.png`)}
                 className="absolute bottom-3 right-3 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"

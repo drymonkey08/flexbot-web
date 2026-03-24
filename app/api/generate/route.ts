@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OUTFITS, SCENES, POSES, PANTS, SHOES, getRandomOutfit, getRandomScene, getRandomPoses } from '@/lib/data';
+import { OUTFITS, SCENES, POSES, getRandomOutfit, getRandomScene, getRandomPoses } from '@/lib/data';
 import { buildPromptsForGeneration } from '@/lib/buildPrompt';
 
 export const maxDuration = 300;
@@ -9,12 +9,9 @@ interface GenerateRequest {
   outfitKey?: string;
   sceneKey?: string;
   poseKey?: string;
-  pantsKey?: string;
-  shoesKey?: string;
   customOutfit?: string;
   customPose?: string;
   customPrompt?: string;
-  chainEnabled?: boolean;
   tattoosEnabled?: boolean;
 }
 
@@ -68,7 +65,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: GenerateRequest = await request.json();
 
-    const { name, outfitKey, sceneKey, poseKey, pantsKey, shoesKey, customOutfit, customPose, chainEnabled = true, tattoosEnabled = false } = body;
+    const { name, outfitKey, sceneKey, poseKey, customOutfit, customPose, tattoosEnabled = false } = body;
 
     if (!name || name.trim() === '') {
       return NextResponse.json(
@@ -89,23 +86,13 @@ export async function POST(request: NextRequest) {
     let scene: { scene: string; light: string };
     let poses: [string, string, string];
 
-    // Resolve base outfit (top/shirt)
+    // Resolve outfit
     if (customOutfit) {
       outfit = customOutfit;
     } else if (outfitKey && OUTFITS[outfitKey]) {
       outfit = OUTFITS[outfitKey];
     } else {
       outfit = getRandomOutfit();
-    }
-
-    // Only override pants/shoes if the user explicitly selected them.
-    // Each outfit already has pants and shoes built into its description —
-    // appending random ones would conflict and confuse the AI.
-    if (pantsKey && PANTS[pantsKey]) {
-      outfit += `. PANTS OVERRIDE — ignore any pants mentioned above, use ONLY these instead: ${PANTS[pantsKey]}`;
-    }
-    if (shoesKey && SHOES[shoesKey]) {
-      outfit += `. SHOES OVERRIDE — ignore any shoes mentioned above, use ONLY these instead: ${SHOES[shoesKey]}`;
     }
 
     // Resolve scene
@@ -129,9 +116,9 @@ export async function POST(request: NextRequest) {
     const sceneDesc = `${scene.scene}, ${scene.light}`;
 
     // Build prompts
-    const { prompts, caption } = buildPromptsForGeneration(name, outfit, sceneDesc, poses, chainEnabled, tattoosEnabled);
+    const { prompts, caption } = buildPromptsForGeneration(name, outfit, sceneDesc, poses, tattoosEnabled);
 
-    // Generate all 3 images in parallel (much faster!)
+    // Generate all 3 images in parallel
     let images: string[] = [];
     try {
       console.log('Generating 3 images in parallel...');
