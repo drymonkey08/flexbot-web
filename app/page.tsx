@@ -127,7 +127,7 @@ export default function Home() {
         time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
       };
       setGallery(prev => {
-        const updated = [item, ...prev];
+        const updated = [item, ...prev].slice(0, 8); // Keep last 8 generations
         saveGallery(updated);
         return updated;
       });
@@ -364,6 +364,34 @@ export default function Home() {
         </div>
       )}
 
+      {/* ── Empty state (first-time hint) ── */}
+      {!isLoading && images.length === 0 && gallery.length === 0 && (
+        <div className="mt-5 rounded-2xl overflow-hidden" style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="px-4 py-5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-4" style={{ color: 'rgba(240,235,224,0.25)' }}>What you get</p>
+            {[
+              { icon: '📸', label: '3 AI photos per generation', sub: 'Different poses, same scene' },
+              { icon: '⚡', label: '30–45 second generation', sub: 'Powered by Google Gemini' },
+              { icon: '💰', label: 'Full body, ultra-realistic', sub: 'Indistinguishable from real photos' },
+              { icon: '⛓️', label: 'Diamond chain every time', sub: 'Cuban link + pendant, always on' },
+            ].map(({ icon, label, sub }) => (
+              <div key={label} className="flex items-center gap-3 mb-4 last:mb-0">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
+                  style={{ background: 'rgba(201,168,75,0.08)', border: '1px solid rgba(201,168,75,0.15)' }}
+                >
+                  {icon}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: 'rgba(240,235,224,0.75)' }}>{label}</p>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'rgba(240,235,224,0.32)' }}>{sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Results ── */}
       {images.length > 0 && (
         <div className="mt-4">
@@ -458,12 +486,17 @@ export default function Home() {
       )}
 
       {/* ── Recent ── */}
-      {gallery.length > 0 && !isLoading && images.length === 0 && (
+      {gallery.length > 0 && !isLoading && (
         <div className="mt-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-3" style={{ color: 'rgba(240,235,224,0.28)' }}>
-            Recent
-          </p>
-          {gallery.slice(0, 4).map((item) => (
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'rgba(240,235,224,0.28)' }}>
+              Recent · {gallery.length}/8
+            </p>
+            <button onClick={() => setTab('gallery')} className="text-[10px] font-semibold" style={{ color: '#C9A84B' }}>
+              See All
+            </button>
+          </div>
+          {gallery.slice(0, 8).map((item) => (
             <button
               key={item.id}
               onClick={() => { setViewingItem(item); setViewingIndex(0); setTab('gallery'); }}
