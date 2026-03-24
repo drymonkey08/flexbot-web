@@ -5,16 +5,33 @@ export function buildPrompt(
   sceneDesc: string,
   pose: string,
   photoNum: number,
-  tattoosEnabled: boolean = false
+  tattoosEnabled: boolean = false,
+  personName2?: string
 ): string {
+  const isDuo = !!personName2;
+
   const tattooLine = tattoosEnabled
-    ? `TATTOOS (MANDATORY): ${personName} has full sleeve tattoos covering BOTH arms completely from shoulder to wrist — dense intricate black-and-grey and color tattoo artwork covering every inch of both arms with no skin showing through, plus prominent neck tattoos covering the sides and back of the neck. Tattoos must be photorealistic with visible ink texture, shading, and detail. They must show on any exposed skin area in every photo.`
-    : `No tattoos. Skin on arms and neck is clean and unmarked.`;
+    ? isDuo
+      ? `TATTOOS (MANDATORY — BOTH SUBJECTS): Both ${personName} AND ${personName2} have full sleeve tattoos on both arms from shoulder to wrist — dense intricate black-and-grey and color artwork, no skin showing through — plus prominent neck tattoos on both. Photorealistic ink texture on both subjects.`
+      : `TATTOOS (MANDATORY): ${personName} has full sleeve tattoos covering BOTH arms completely from shoulder to wrist — dense intricate black-and-grey and color tattoo artwork covering every inch of both arms with no skin showing through, plus prominent neck tattoos covering the sides and back of the neck. Tattoos must be photorealistic with visible ink texture, shading, and detail. They must show on any exposed skin area in every photo.`
+    : isDuo
+      ? `No tattoos on either subject. Clean skin on both ${personName} and ${personName2}.`
+      : `No tattoos. Skin on arms and neck is clean and unmarked.`;
+
+  const subjectLine = isDuo
+    ? `TWO SUBJECTS IN THE SAME PHOTO: (1) ${personName} — 100% photorealistic accurate likeness, exact face, skin tone, body type, all distinguishing features, instantly recognizable. (2) ${personName2} — 100% photorealistic accurate likeness, exact face, skin tone, body type, all distinguishing features, instantly recognizable. BOTH subjects are FULLY VISIBLE head-to-toe in the same frame, positioned naturally together — side by side or interacting. Neither person is cropped or obscured.`
+    : `Subject: ${personName} — 100% photorealistic accurate likeness: exact face structure, skin tone, hair texture, body type, all distinguishing physical features. Must be instantly recognizable as ${personName}. Render the face with complete accuracy — no idealization, no smoothing.`;
+
+  const chainLine = isDuo
+    ? `MANDATORY JEWELRY — BOTH SUBJECTS: Each person is wearing their own thick heavy diamond-encrusted Cuban link chain with a large brilliant-cut diamond pendant. Both chains must be clearly visible in every photo, catching light with realistic diamond sparkle.`
+    : `MANDATORY JEWELRY — ALWAYS VISIBLE IN EVERY PHOTO: a thick heavy diamond-encrusted Cuban link chain hanging on the chest with a large brilliant-cut diamond pendant. The chain must catch light with realistic diamond sparkle, individual chain links clearly defined, weight and drape realistic. This chain and pendant are visible in EVERY single photo regardless of pose or angle.`;
 
   return [
     `HYPER-PHOTOREALISTIC candid phone photo — photo ${photoNum} of 3 from the SAME shoot session. Must be completely indistinguishable from a real photo taken on an iPhone 15 Pro Max. NOT AI art, NOT a render, NOT a studio shot — a real candid street photo.`,
 
-    `FULL BODY — MANDATORY AND NON-NEGOTIABLE: The subject's ENTIRE body must be visible from the very top of their head down to their shoes/feet. This is a full-body shot. The camera is positioned far enough back that head, torso, legs, and shoes are ALL fully in frame with no cropping of any body part. Feet and shoes are clearly visible at the bottom of the frame. Top of head is clearly visible at the top. This is NOT a portrait, NOT a waist-up shot, NOT a bust shot — it is a FULL BODY photo every single time.`,
+    isDuo
+      ? `FULL BODY BOTH SUBJECTS — MANDATORY: BOTH ${personName} AND ${personName2} must be visible FULL BODY from head to shoes. Camera is positioned far enough back to show both people completely in the same frame — heads at top, feet/shoes at bottom, nothing cropped on either person.`
+      : `FULL BODY — MANDATORY AND NON-NEGOTIABLE: The subject's ENTIRE body must be visible from the very top of their head down to their shoes/feet. This is a full-body shot. The camera is positioned far enough back that head, torso, legs, and shoes are ALL fully in frame with no cropping of any body part. Feet and shoes are clearly visible at the bottom of the frame. Top of head is clearly visible at the top. This is NOT a portrait, NOT a waist-up shot, NOT a bust shot — it is a FULL BODY photo every single time.`,
 
     `CRITICAL SCENE LOCK — THIS IS NON-NEGOTIABLE: Photo ${photoNum} of 3. The background, every prop, every object, every light source, the camera distance, camera height, and camera angle are IDENTICAL across all 3 photos. ONLY the subject's body pose changes between photos. Do NOT move any background element, do NOT reposition any prop, do NOT change the lighting in any way, do NOT shift or rotate the camera. The scene must look like a continuous photoshoot in the exact same spot.`,
 
@@ -22,15 +39,17 @@ export function buildPrompt(
 
     `PHONE PHOTO REALISM: Shot on iPhone 15 Pro Max. Vertical 4:5 portrait crop. FULL BODY head-to-toe — shoes visible at bottom, head at top, nothing cropped. Authentic phone camera characteristics — slight lens distortion at edges, natural chromatic aberration, real depth of field with background softly blurred, faint sensor grain in shadows, natural lens flare from bright light sources, slight motion blur on fast-moving elements. The perspective and crop must feel like a real person standing back and holding a phone to capture the full body.`,
 
-    `Subject: ${personName} — 100% photorealistic accurate likeness: exact face structure, skin tone, hair texture, body type, all distinguishing physical features. Must be instantly recognizable as ${personName}. Render the face with complete accuracy — no idealization, no smoothing.`,
+    subjectLine,
 
     `Outfit (IDENTICAL and UNCHANGED across all 3 photos): ${outfit}.`,
 
-    `MANDATORY JEWELRY — ALWAYS VISIBLE IN EVERY PHOTO: a thick heavy diamond-encrusted Cuban link chain hanging on the chest with a large brilliant-cut diamond pendant. The chain must catch light with realistic diamond sparkle, individual chain links clearly defined, weight and drape realistic. This chain and pendant are visible in EVERY single photo regardless of pose or angle.`,
+    chainLine,
 
     tattooLine,
 
-    `Action for THIS photo only (${photoNum}/3): ${pose}`,
+    isDuo
+      ? `Action for THIS photo only (${photoNum}/3): ${pose}. Both ${personName} and ${personName2} are performing this action together or a natural variation of it.`
+      : `Action for THIS photo only (${photoNum}/3): ${pose}`,
 
     `Scene (LOCKED IDENTICAL in all 3 photos — do not alter anything): ${sceneDesc}.`,
 
@@ -46,7 +65,9 @@ export function buildPrompt(
 
     `GUNS: If present — must be a real, accurately rendered firearm. Correct proportions, accurate details, weight and grip realistic. Held with proper hand positioning and realistic grip tension. NOT a toy, NOT distorted.`,
 
-    `PROHIBITIONS: No cropped body (feet and full legs MUST be visible), no portrait framing, no waist-up shots, no bust shots, no close-up framing — ALWAYS full body. No phone frame, no iPhone UI, no watermark, no text overlay, no cartoon style, no CGI sheen, no studio backdrop, no VHS filter, no date stamp, no extra fingers, no distorted hands, no floating objects, no elegant model posing, no studio lighting rigs.`,
+    isDuo
+      ? `PROHIBITIONS: No solo shots of just one person — BOTH must be in frame. No cropped body on either subject (both need full body visible). No portrait framing, no waist-up shots — ALWAYS full body for both. No phone frame, no iPhone UI, no watermark, no text overlay, no cartoon style, no CGI sheen, no studio backdrop, no VHS filter, no date stamp, no extra fingers, no distorted hands, no floating objects, no studio lighting rigs.`
+      : `PROHIBITIONS: No cropped body (feet and full legs MUST be visible), no portrait framing, no waist-up shots, no bust shots, no close-up framing — ALWAYS full body. No phone frame, no iPhone UI, no watermark, no text overlay, no cartoon style, no CGI sheen, no studio backdrop, no VHS filter, no date stamp, no extra fingers, no distorted hands, no floating objects, no elegant model posing, no studio lighting rigs.`,
   ].join(' ');
 }
 
@@ -70,13 +91,16 @@ export function buildPromptsForGeneration(
   outfit: string,
   sceneDesc: string,
   poses: [string, string, string],
-  tattoosEnabled: boolean = false
+  tattoosEnabled: boolean = false,
+  name2?: string
 ): PromptOutput {
-  const prompt1 = buildPrompt(name, outfit, sceneDesc, poses[0], 1, tattoosEnabled);
-  const prompt2 = buildPrompt(name, outfit, sceneDesc, poses[1], 2, tattoosEnabled);
-  const prompt3 = buildPrompt(name, outfit, sceneDesc, poses[2], 3, tattoosEnabled);
+  const prompt1 = buildPrompt(name, outfit, sceneDesc, poses[0], 1, tattoosEnabled, name2);
+  const prompt2 = buildPrompt(name, outfit, sceneDesc, poses[1], 2, tattoosEnabled, name2);
+  const prompt3 = buildPrompt(name, outfit, sceneDesc, poses[2], 3, tattoosEnabled, name2);
 
-  const caption = `💰 **${name.toUpperCase()}** — PREMEDITATED FLEX\n\nThis is what it looks like when you move different. 🔥\n\n#PremeditatedMillionaire #WealthMindset #MoneyMoves`;
+  const caption = name2
+    ? `💰 **${name.toUpperCase()} & ${name2.toUpperCase()}** — PREMEDITATED FLEX\n\nTwo different. One scene. 🔥\n\n#PremeditatedMillionaire #WealthMindset #MoneyMoves`
+    : `💰 **${name.toUpperCase()}** — PREMEDITATED FLEX\n\nThis is what it looks like when you move different. 🔥\n\n#PremeditatedMillionaire #WealthMindset #MoneyMoves`;
 
   return {
     prompts: [prompt1, prompt2, prompt3],

@@ -6,6 +6,7 @@ export const maxDuration = 300;
 
 interface GenerateRequest {
   name: string;
+  name2?: string;
   outfitKey?: string;
   sceneKey?: string;
   poseKey?: string;
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: GenerateRequest = await request.json();
 
-    const { name, outfitKey, sceneKey, poseKey, customOutfit, customPose, tattoosEnabled = false } = body;
+    const { name, name2, outfitKey, sceneKey, poseKey, customOutfit, customPose, tattoosEnabled = false } = body;
 
     if (!name || name.trim() === '') {
       return NextResponse.json(
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
     const sceneDesc = `${scene.scene}, ${scene.light}`;
 
     // Build prompts
-    const { prompts, caption } = buildPromptsForGeneration(name, outfit, sceneDesc, poses, tattoosEnabled);
+    const { prompts, caption } = buildPromptsForGeneration(name, outfit, sceneDesc, poses, tattoosEnabled, name2);
 
     // Generate all 3 images in parallel
     let images: string[] = [];

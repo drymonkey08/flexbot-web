@@ -67,6 +67,8 @@ export default function Home() {
 
   // Form state
   const [name, setName] = useState('');
+  const [name2, setName2] = useState('');
+  const [showName2, setShowName2] = useState(false);
   const [outfitKey, setOutfitKey] = useState('');
   const [sceneKey, setSceneKey] = useState('');
   const [poseKey, setPoseKey] = useState('');
@@ -98,6 +100,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
+          name2: (showName2 && name2.trim()) ? name2.trim() : undefined,
           outfitKey: outfitKey || undefined,
           sceneKey: sceneKey || undefined,
           poseKey: poseKey || undefined,
@@ -185,34 +188,80 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Name Input ── */}
-      <div className="relative mb-4">
-        <input
-          id="name-input"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
-          placeholder="Who&apos;s flexing? (e.g. Steph Curry)"
-          className="w-full px-4 py-4 rounded-2xl font-medium transition-all"
-          style={{
-            background: '#111111',
-            border: `1.5px solid ${name.trim() ? 'rgba(201,168,75,0.4)' : 'rgba(255,255,255,0.07)'}`,
-            color: '#F0EBE0',
-            fontSize: '0.95rem',
-            boxShadow: name.trim() ? '0 0 0 3px rgba(201,168,75,0.07)' : 'none',
-          }}
-        />
-        {name.trim() && (
+      {/* ── Name Input(s) ── */}
+      <div className="mb-4 space-y-2">
+        {/* Person 1 */}
+        <div className="relative">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+            <span className="text-xs font-bold" style={{ color: 'rgba(201,168,75,0.5)' }}>1</span>
+          </div>
+          <input
+            id="name-input"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+            placeholder="Who's flexing? (e.g. Steph Curry)"
+            className="w-full pl-8 pr-10 py-4 rounded-2xl font-medium transition-all"
+            style={{
+              background: '#111111',
+              border: `1.5px solid ${name.trim() ? 'rgba(201,168,75,0.4)' : 'rgba(255,255,255,0.07)'}`,
+              color: '#F0EBE0',
+              fontSize: '0.95rem',
+              boxShadow: name.trim() ? '0 0 0 3px rgba(201,168,75,0.07)' : 'none',
+            }}
+          />
+          {/* Add / Remove person 2 toggle */}
           <button
-            onClick={() => setName('')}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.08)' }}
+            onClick={() => { setShowName2(!showName2); if (showName2) setName2(''); }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center transition-all"
+            style={{
+              background: showName2 ? 'rgba(229,57,53,0.15)' : 'rgba(201,168,75,0.12)',
+              border: `1px solid ${showName2 ? 'rgba(229,57,53,0.3)' : 'rgba(201,168,75,0.25)'}`,
+            }}
+            title={showName2 ? 'Remove second person' : 'Add second person'}
           >
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,224,0.5)" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+            {showName2 ? (
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(229,57,53,0.8)" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            ) : (
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,168,75,0.8)" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            )}
           </button>
+        </div>
+
+        {/* Person 2 — slides in */}
+        {showName2 && (
+          <div className="relative">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+              <span className="text-xs font-bold" style={{ color: 'rgba(201,168,75,0.5)' }}>2</span>
+            </div>
+            <input
+              type="text"
+              value={name2}
+              onChange={(e) => setName2(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+              placeholder="Second person (e.g. LeBron James)"
+              className="w-full pl-8 pr-4 py-4 rounded-2xl font-medium transition-all"
+              style={{
+                background: '#111111',
+                border: `1.5px solid ${name2.trim() ? 'rgba(201,168,75,0.4)' : 'rgba(255,255,255,0.07)'}`,
+                color: '#F0EBE0',
+                fontSize: '0.95rem',
+                boxShadow: name2.trim() ? '0 0 0 3px rgba(201,168,75,0.07)' : 'none',
+              }}
+            />
+          </div>
+        )}
+
+        {/* Duo mode label */}
+        {showName2 && (
+          <p className="text-[10px] text-center font-semibold uppercase tracking-[0.2em]" style={{ color: 'rgba(201,168,75,0.5)' }}>
+            👥 Duo mode — both in the same scene
+          </p>
         )}
       </div>
 
@@ -320,7 +369,9 @@ export default function Home() {
           <>
             <span className="text-lg">⚡</span>
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.15rem', color: '#0A0A0A', letterSpacing: '0.15em' }}>
-              {name.trim() ? `Flex ${name.split(' ')[0]}` : 'Generate Flex'}
+              {showName2 && name.trim() && name2.trim()
+                ? `Flex ${name.split(' ')[0]} & ${name2.split(' ')[0]}`
+                : name.trim() ? `Flex ${name.split(' ')[0]}` : 'Generate Flex'}
             </span>
           </>
         )}
