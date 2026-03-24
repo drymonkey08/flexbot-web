@@ -14,11 +14,13 @@ export function buildPrompt(
   return [
     `HYPER-PHOTOREALISTIC candid phone photo — photo ${photoNum} of 3 from the SAME shoot session. Must be completely indistinguishable from a real photo taken on an iPhone 15 Pro Max. NOT AI art, NOT a render, NOT a studio shot — a real candid street photo.`,
 
+    `FULL BODY — MANDATORY AND NON-NEGOTIABLE: The subject's ENTIRE body must be visible from the very top of their head down to their shoes/feet. This is a full-body shot. The camera is positioned far enough back that head, torso, legs, and shoes are ALL fully in frame with no cropping of any body part. Feet and shoes are clearly visible at the bottom of the frame. Top of head is clearly visible at the top. This is NOT a portrait, NOT a waist-up shot, NOT a bust shot — it is a FULL BODY photo every single time.`,
+
     `CRITICAL SCENE LOCK — THIS IS NON-NEGOTIABLE: Photo ${photoNum} of 3. The background, every prop, every object, every light source, the camera distance, camera height, and camera angle are IDENTICAL across all 3 photos. ONLY the subject's body pose changes between photos. Do NOT move any background element, do NOT reposition any prop, do NOT change the lighting in any way, do NOT shift or rotate the camera. The scene must look like a continuous photoshoot in the exact same spot.`,
 
     `STYLE: RAW STREET PHOTO energy — gritty, unfiltered, authentic. Looks like someone nearby snapped it on their phone in the moment. Never clean editorial or studio. Think trap house, block corner, parking lot, hood authenticity. Candid and real.`,
 
-    `PHONE PHOTO REALISM: Shot on iPhone 15 Pro Max. Vertical 4:5 portrait crop. Full body head-to-toe visible. Authentic phone camera characteristics — slight lens distortion at edges, natural chromatic aberration, real depth of field with background softly blurred, faint sensor grain in shadows, natural lens flare from bright light sources, slight motion blur on fast-moving elements. The perspective and crop must feel like a real person holding a phone, not a camera on a tripod.`,
+    `PHONE PHOTO REALISM: Shot on iPhone 15 Pro Max. Vertical 4:5 portrait crop. FULL BODY head-to-toe — shoes visible at bottom, head at top, nothing cropped. Authentic phone camera characteristics — slight lens distortion at edges, natural chromatic aberration, real depth of field with background softly blurred, faint sensor grain in shadows, natural lens flare from bright light sources, slight motion blur on fast-moving elements. The perspective and crop must feel like a real person standing back and holding a phone to capture the full body.`,
 
     `Subject: ${personName} — 100% photorealistic accurate likeness: exact face structure, skin tone, hair texture, body type, all distinguishing physical features. Must be instantly recognizable as ${personName}. Render the face with complete accuracy — no idealization, no smoothing.`,
 
@@ -44,7 +46,7 @@ export function buildPrompt(
 
     `GUNS: If present — must be a real, accurately rendered firearm. Correct proportions, accurate details, weight and grip realistic. Held with proper hand positioning and realistic grip tension. NOT a toy, NOT distorted.`,
 
-    `PROHIBITIONS: No phone frame, no iPhone UI, no watermark, no text overlay, no cartoon style, no CGI sheen, no studio backdrop, no VHS filter, no date stamp, no extra fingers, no distorted hands, no floating objects, no elegant model posing, no studio lighting rigs.`,
+    `PROHIBITIONS: No cropped body (feet and full legs MUST be visible), no portrait framing, no waist-up shots, no bust shots, no close-up framing — ALWAYS full body. No phone frame, no iPhone UI, no watermark, no text overlay, no cartoon style, no CGI sheen, no studio backdrop, no VHS filter, no date stamp, no extra fingers, no distorted hands, no floating objects, no elegant model posing, no studio lighting rigs.`,
   ].join(' ');
 }
 

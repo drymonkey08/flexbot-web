@@ -34,9 +34,12 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="FlexBot" />
         <link rel="apple-touch-icon" href="/icon.png" />
-        <meta name="theme-color" content="#0a0a0a" />
+        <meta name="theme-color" content="#070707" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="bg-white text-gray-900 antialiased">{children}</body>
+      <body className="antialiased" style={{ background: '#070707', color: '#F0EBE0' }}>{children}</body>
     </html>
   );
 }

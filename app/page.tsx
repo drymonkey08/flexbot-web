@@ -21,6 +21,7 @@ interface GalleryItem {
 }
 
 type Tab = 'home' | 'gallery' | 'profile';
+type OptionTab = 'outfit' | 'scene' | 'pose';
 
 // ─── LocalStorage helpers ───
 function loadGallery(): GalleryItem[] {
@@ -55,7 +56,7 @@ function downloadImage(base64: string, filename: string) {
 export default function Home() {
   const [tab, setTab] = useState<Tab>('home');
   const [images, setImages] = useState<string[]>([]);
-  const [caption, setCaption] = useState('');
+  const [, setCaption] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
@@ -70,22 +71,23 @@ export default function Home() {
   const [sceneKey, setSceneKey] = useState('');
   const [poseKey, setPoseKey] = useState('');
   const [tattoosEnabled, setTattoosEnabled] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
-  const [activeOption, setActiveOption] = useState<'outfit' | 'scene' | 'pose'>('outfit');
+  const [activeOption, setActiveOption] = useState<OptionTab>('outfit');
 
   useEffect(() => {
     setGallery(loadGallery());
   }, []);
 
   const handleGenerate = async () => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      document.getElementById('name-input')?.focus();
+      return;
+    }
     setIsLoading(true);
     setProgress(0);
     setError('');
     setImages([]);
     setCaption('');
 
-    // Simulate progress: 0 → 1 at ~10s, 1 → 2 at ~25s, 2 → 3 when done
     const progressTimer = setInterval(() => {
       setProgress(prev => (prev < 2 ? prev + 1 : prev));
     }, 12000);
@@ -149,258 +151,304 @@ export default function Home() {
 
   const totalGenerated = gallery.reduce((sum, g) => sum + g.images.length, 0);
 
+  const currentOptionValue = activeOption === 'outfit' ? outfitKey : activeOption === 'scene' ? sceneKey : poseKey;
+  const setCurrentOption = (val: string) => {
+    if (activeOption === 'outfit') setOutfitKey(val);
+    else if (activeOption === 'scene') setSceneKey(val);
+    else setPoseKey(val);
+  };
+  const currentOptionKeys = activeOption === 'outfit' ? Object.keys(OUTFITS) : activeOption === 'scene' ? Object.keys(SCENES) : Object.keys(POSES);
+
   // ═══════════════════════════════════════
   // HOME SCREEN
   // ═══════════════════════════════════════
   const renderHome = () => (
-    <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 72px)' }}>
-      {/* FlexBot branding */}
-      <div className="flex items-center gap-2 mb-4">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">FlexBot</h1>
-        <span className="text-lg">⚡</span>
+    <div className="px-4 pt-4 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 72px)' }}>
+
+      {/* ── Header ── */}
+      <div className="flex items-end justify-between mb-5">
+        <div>
+          <h1
+            style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2.8rem', color: '#C9A84B', letterSpacing: '0.12em', lineHeight: 1 }}
+          >
+            FLEXBOT
+          </h1>
+          <p className="text-[9px] font-semibold tracking-[0.3em] uppercase mt-1" style={{ color: 'rgba(240,235,224,0.28)' }}>
+            AI · STREET · FLEX
+          </p>
+        </div>
+        <div
+          className="w-9 h-9 rounded-full flex items-center justify-center text-base"
+          style={{ background: 'rgba(201,168,75,0.1)', border: '1px solid rgba(201,168,75,0.22)' }}
+        >
+          ⚡
+        </div>
       </div>
 
-      {/* Search-style input — above cards */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="flex-1 relative">
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      {/* ── Name Input ── */}
+      <div className="relative mb-4">
+        <input
+          id="name-input"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+          placeholder="Who&apos;s flexing? (e.g. Steph Curry)"
+          className="w-full px-4 py-4 rounded-2xl font-medium transition-all"
+          style={{
+            background: '#111111',
+            border: `1.5px solid ${name.trim() ? 'rgba(201,168,75,0.4)' : 'rgba(255,255,255,0.07)'}`,
+            color: '#F0EBE0',
+            fontSize: '0.95rem',
+            boxShadow: name.trim() ? '0 0 0 3px rgba(201,168,75,0.07)' : 'none',
+          }}
+        />
+        {name.trim() && (
+          <button
+            onClick={() => setName('')}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(255,255,255,0.08)' }}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,224,0.5)" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
-          </div>
-          <input
-            id="name-input"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
-            placeholder="What Celebrity Is Flexing?"
-            className="w-full pl-10 pr-4 py-3.5 text-sm bg-gray-100 rounded-full text-gray-900 placeholder-gray-400 font-medium focus:ring-2 focus:ring-accent/50 border-0"
+          </button>
+        )}
+      </div>
+
+      {/* ── Options Block: Tabs + Pills ── */}
+      <div
+        className="rounded-2xl overflow-hidden mb-4"
+        style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        {/* Tab row */}
+        <div className="flex" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          {([
+            { key: 'outfit', label: 'Outfit', emoji: '👔', selected: outfitKey },
+            { key: 'scene', label: 'Scene', emoji: '🏙️', selected: sceneKey },
+            { key: 'pose', label: 'Pose', emoji: '💪', selected: poseKey },
+          ] as { key: OptionTab; label: string; emoji: string; selected: string }[]).map(({ key, label, emoji, selected }) => (
+            <button
+              key={key}
+              onClick={() => setActiveOption(key)}
+              className="flex-1 py-3 flex flex-col items-center gap-0.5 transition-all"
+              style={{
+                borderBottom: `2px solid ${activeOption === key ? '#C9A84B' : 'transparent'}`,
+              }}
+            >
+              <span className="text-base leading-none">{emoji}</span>
+              <span
+                className="text-[10px] font-semibold uppercase tracking-[0.1em]"
+                style={{ color: activeOption === key ? '#C9A84B' : 'rgba(240,235,224,0.38)' }}
+              >
+                {label}
+              </span>
+              {selected && (
+                <span
+                  className="text-[8px] truncate max-w-[60px]"
+                  style={{ color: 'rgba(201,168,75,0.7)' }}
+                >
+                  {selected.replace(/_/g, ' ')}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Pill scroll for active tab */}
+        <div className="px-3 py-3">
+          <PillPicker
+            options={currentOptionKeys}
+            value={currentOptionValue}
+            onChange={setCurrentOption}
           />
         </div>
       </div>
 
-      {/* Category Cards — 3x2 grid, tappable to open picker */}
-      <div className="grid grid-cols-3 gap-2.5 mb-5">
-        {/* Outfits */}
-        <button
-          onClick={() => { setShowOptions(true); setActiveOption('outfit'); }}
-          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
-        >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl">👔</span>
+      {/* ── Tattoo Toggle ── */}
+      <div
+        className="flex items-center justify-between px-4 py-3.5 rounded-2xl mb-5"
+        style={{
+          background: '#0C0C0C',
+          border: `1px solid ${tattoosEnabled ? 'rgba(139,92,246,0.35)' : 'rgba(255,255,255,0.06)'}`,
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-xl">{tattoosEnabled ? '🔱' : '🫧'}</span>
+          <div>
+            <p className="text-sm font-semibold" style={{ color: '#F0EBE0' }}>Sleeve Tattoos</p>
+            <p className="text-[10px] mt-0.5" style={{ color: tattoosEnabled ? '#a78bfa' : 'rgba(240,235,224,0.32)' }}>
+              {tattoosEnabled ? 'Full sleeves + neck tattoos' : 'Clean skin — no ink'}
+            </p>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
-          <div className="relative z-20">
-            <span className="text-xs font-semibold text-white">Outfits</span>
-            {outfitKey && <p className="text-[9px] text-gray-400 truncate">{outfitKey.replace(/_/g, ' ')}</p>}
-          </div>
-        </button>
-
-        {/* Scenes */}
-        <button
-          onClick={() => { setShowOptions(true); setActiveOption('scene'); }}
-          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
-        >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl">🏙️</span>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
-          <div className="relative z-20">
-            <span className="text-xs font-semibold text-white">Scenes</span>
-            {sceneKey && <p className="text-[9px] text-gray-400 truncate">{sceneKey.replace(/_/g, ' ')}</p>}
-          </div>
-        </button>
-
-        {/* Poses */}
-        <button
-          onClick={() => { setShowOptions(true); setActiveOption('pose'); }}
-          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border border-gray-800 text-left cursor-pointer active:scale-[0.97] transition"
-        >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl">💪</span>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
-          <div className="relative z-20">
-            <span className="text-xs font-semibold text-white">Poses</span>
-            {poseKey && <p className="text-[9px] text-gray-400 truncate">{poseKey.replace(/_/g, ' ')}</p>}
-          </div>
-        </button>
-
-        {/* Tattoo Toggle card */}
+        </div>
         <button
           type="button"
           onClick={() => setTattoosEnabled(!tattoosEnabled)}
-          className="bg-gray-900 rounded-2xl p-3 aspect-square flex flex-col justify-end relative overflow-hidden border cursor-pointer text-left active:scale-[0.97] transition"
-          style={{ borderColor: tattoosEnabled ? 'rgba(139,92,246,0.6)' : 'rgba(75,75,75,0.5)' }}
+          className="relative w-12 h-6 rounded-full transition-colors duration-200 flex-shrink-0"
+          style={{ background: tattoosEnabled ? 'rgba(139,92,246,0.75)' : 'rgba(255,255,255,0.09)' }}
         >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl">{tattoosEnabled ? '🔱' : '🫧'}</span>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
-          <div className="relative z-20">
-            <span className="text-xs font-semibold text-white">Tattoos</span>
-            <p className="text-[9px] truncate" style={{ color: tattoosEnabled ? '#a78bfa' : '#9ca3af' }}>
-              {tattoosEnabled ? 'Full Sleeves + Neck' : 'Clean Skin'}
-            </p>
-          </div>
-        </button>
-
-        {/* Generate — spans 2 columns, red glow accent */}
-        <button
-          onClick={() => name.trim() ? handleGenerate() : document.getElementById('name-input')?.focus()}
-          className="col-span-2 rounded-2xl p-3 flex items-center justify-center gap-2 relative overflow-hidden cursor-pointer active:scale-[0.98] transition"
-          style={{ background: '#111', boxShadow: 'inset 0 0 20px rgba(229,57,53,0.25), 0 0 0 1px rgba(229,57,53,0.3)', minHeight: '64px' }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-accent/20 via-accent/10 to-transparent z-10" />
-          <span className="relative z-20 text-2xl drop-shadow-[0_0_8px_rgba(229,57,53,0.8)]">⚡</span>
-          <span className="relative z-20 text-sm font-bold text-white tracking-wide">Generate</span>
+          <span
+            className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200"
+            style={{ left: tattoosEnabled ? '26px' : '2px' }}
+          />
         </button>
       </div>
 
-      {/* Options picker — scrollable pill buttons */}
-      {showOptions && (
-        <div className="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-200">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-gray-900 uppercase tracking-wider">
-              {activeOption === 'outfit' ? 'Choose Outfit' : activeOption === 'scene' ? 'Choose Scene' : 'Choose Pose'}
+      {/* ── Generate Button ── */}
+      <button
+        onClick={handleGenerate}
+        disabled={isLoading}
+        className="w-full py-4 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] btn-shimmer relative overflow-hidden disabled:opacity-60"
+        style={{
+          background: 'linear-gradient(135deg, #C9A84B 0%, #A07628 100%)',
+          boxShadow: isLoading ? 'none' : '0 4px 28px rgba(201,168,75,0.3)',
+          border: '1px solid rgba(201,168,75,0.4)',
+        }}
+      >
+        {isLoading ? (
+          <>
+            <div
+              className="w-5 h-5 rounded-full border-2 border-black/20 border-t-black/70"
+              style={{ animation: 'spin 0.8s linear infinite' }}
+            />
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.05rem', color: '#0F0F0F', letterSpacing: '0.15em' }}>
+              Generating {progress}/3...
             </span>
-            <button onClick={() => setShowOptions(false)} className="text-xs text-accent font-bold">Done</button>
-          </div>
-          <PillPicker
-            options={
-              activeOption === 'outfit' ? Object.keys(OUTFITS) :
-              activeOption === 'scene' ? Object.keys(SCENES) :
-              Object.keys(POSES)
-            }
-            value={
-              activeOption === 'outfit' ? outfitKey :
-              activeOption === 'scene' ? sceneKey :
-              poseKey
-            }
-            onChange={(val) => {
-              if (activeOption === 'outfit') setOutfitKey(val);
-              else if (activeOption === 'scene') setSceneKey(val);
-              else setPoseKey(val);
-            }}
-          />
-        </div>
-      )}
+          </>
+        ) : (
+          <>
+            <span className="text-lg">⚡</span>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.15rem', color: '#0A0A0A', letterSpacing: '0.15em' }}>
+              {name.trim() ? `Flex ${name.split(' ')[0]}` : 'Generate Flex'}
+            </span>
+          </>
+        )}
+      </button>
 
-      {/* Error message */}
+      {/* ── Error ── */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between">
-          <p className="text-xs text-red-600 font-medium">{error}</p>
-          <button onClick={() => setError('')} className="text-red-400 ml-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <div className="rounded-2xl px-4 py-3 mt-3 flex items-center justify-between" style={{ background: 'rgba(229,57,53,0.1)', border: '1px solid rgba(229,57,53,0.25)' }}>
+          <p className="text-xs font-medium" style={{ color: '#ff6b6b' }}>{error}</p>
+          <button onClick={() => setError('')} className="ml-2 opacity-60 hover:opacity-100">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
       )}
 
-      {/* Generate Button */}
-      {name.trim() && (
-        <button
-          onClick={handleGenerate}
-          disabled={isLoading}
-          className={`w-full py-4 bg-accent text-white text-sm font-bold rounded-2xl mb-3 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all relative overflow-hidden ${!isLoading ? 'btn-shimmer' : ''}`}
-        >
-          {isLoading ? 'Generating...' : 'Generate Flex ⚡'}
-        </button>
-      )}
-
-      {/* Loading state with progress bar */}
+      {/* ── Loading ── */}
       {isLoading && !images.length && (
-        <div className="bg-gray-50 rounded-2xl p-6 mb-4 flex flex-col items-center justify-center border border-gray-200" style={{ minHeight: 200 }}>
-          <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin mb-4" />
-          <p className="text-xs font-semibold text-gray-900 mb-1">Creating {name}&apos;s flex photos...</p>
-          <p className="text-[10px] text-gray-400 mb-4">This takes 30–45 seconds</p>
-          <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+        <div
+          className="rounded-2xl p-8 mt-4 flex flex-col items-center justify-center"
+          style={{ background: '#0C0C0C', border: '1px solid rgba(201,168,75,0.12)', minHeight: 220 }}
+        >
+          <div
+            className="w-12 h-12 rounded-full mb-5"
+            style={{ border: '2px solid rgba(201,168,75,0.15)', borderTop: '2px solid #C9A84B', animation: 'spin 0.9s linear infinite' }}
+          />
+          <p className="text-sm font-semibold mb-1" style={{ color: '#F0EBE0' }}>
+            Creating {name}&apos;s flex photos...
+          </p>
+          <p className="text-[11px] mb-5" style={{ color: 'rgba(240,235,224,0.32)' }}>
+            30–45 seconds · 3 AI photos
+          </p>
+          <div className="w-full rounded-full overflow-hidden h-1" style={{ background: 'rgba(255,255,255,0.06)' }}>
             <div
-              className="bg-accent h-1.5 rounded-full transition-all duration-[3000ms] ease-out"
-              style={{ width: `${(progress / 3) * 100}%` }}
+              className="h-1 rounded-full transition-all duration-[3000ms] ease-out"
+              style={{ width: `${(progress / 3) * 100}%`, background: 'linear-gradient(90deg, #C9A84B, #E8C96A)' }}
             />
           </div>
-          <p className="text-[10px] text-gray-400 mt-2">{progress}/3 images</p>
+          <p className="text-[10px] mt-2" style={{ color: 'rgba(240,235,224,0.28)' }}>{progress} of 3 images ready</p>
         </div>
       )}
 
-      {/* Results */}
+      {/* ── Results ── */}
       {images.length > 0 && (
-        <div className="mb-5">
-          <div className="bg-white rounded-2xl overflow-hidden mb-3 border border-gray-200 shadow-sm">
+        <div className="mt-4">
+          <div
+            className="rounded-2xl overflow-hidden mb-3"
+            style={{ background: '#0C0C0C', border: '1px solid rgba(201,168,75,0.2)', boxShadow: '0 8px 48px rgba(0,0,0,0.7)' }}
+          >
             <div className="relative">
               <img
                 src={`data:image/png;base64,${images[selectedIndex]}`}
                 alt={`${name} flex`}
                 className="w-full block"
               />
-              {/* Prev arrow */}
+              {/* Prev */}
               <button
                 onClick={() => setSelectedIndex(prev => (prev - 1 + images.length) % images.length)}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center active:scale-90 transition"
+                style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
-              {/* Next arrow */}
+              {/* Next */}
               <button
                 onClick={() => setSelectedIndex(prev => (prev + 1) % images.length)}
-                className="absolute right-12 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"
+                className="absolute top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center active:scale-90 transition"
+                style={{ right: '52px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </button>
-              {/* Photo counter badge */}
-              <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1">
-                <span className="text-white text-[10px] font-semibold">{selectedIndex + 1} / {images.length}</span>
+              {/* Counter */}
+              <div
+                className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1"
+                style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)' }}
+              >
+                <span className="text-[10px] font-semibold" style={{ color: '#C9A84B' }}>
+                  {selectedIndex + 1} / {images.length}
+                </span>
               </div>
+              {/* Download */}
               <button
                 onClick={() => downloadImage(images[selectedIndex], `flexbot-${name}-${selectedIndex + 1}.png`)}
-                className="absolute bottom-3 right-3 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"
+                className="absolute bottom-3 right-3 w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition"
+                style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
               </button>
             </div>
-            <div className="px-4 py-3">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900">{name}</p>
-                  <p className="text-[10px] text-gray-500 mt-0.5">
-                    {outfitKey ? outfitKey.replace(/_/g, ' ') : 'Random outfit'} · Photo {selectedIndex + 1}/3
-                  </p>
-                  {caption && <p className="text-[10px] text-gray-400 mt-0.5 truncate">{caption}</p>}
-                </div>
-                <button
-                  onClick={() => {
-                    images.forEach((img, i) => {
-                      setTimeout(() => downloadImage(img, `flexbot-${name}-${i + 1}.png`), i * 300);
-                    });
-                  }}
-                  className="text-[10px] text-accent font-semibold"
-                >
-                  Download All
-                </button>
+
+            {/* Image info bar */}
+            <div className="px-4 py-3 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate" style={{ color: '#F0EBE0' }}>{name}</p>
+                <p className="text-[10px] mt-0.5 truncate" style={{ color: 'rgba(240,235,224,0.38)' }}>
+                  {outfitKey ? outfitKey.replace(/_/g, ' ') : 'Random outfit'} · Photo {selectedIndex + 1}/3
+                </p>
               </div>
+              <button
+                onClick={() => images.forEach((img, i) => setTimeout(() => downloadImage(img, `flexbot-${name}-${i + 1}.png`), i * 300))}
+                className="text-[11px] font-semibold ml-3 flex-shrink-0"
+                style={{ color: '#C9A84B' }}
+              >
+                Save All
+              </button>
             </div>
           </div>
 
+          {/* Thumbnails */}
           <div className="grid grid-cols-3 gap-2">
             {images.map((img, idx) => (
               <button
                 key={idx}
                 onClick={() => setSelectedIndex(idx)}
-                className={`aspect-square rounded-xl overflow-hidden border-2 transition ${
-                  selectedIndex === idx ? 'border-accent' : 'border-gray-200'
-                }`}
+                className="aspect-square rounded-xl overflow-hidden transition-all active:scale-95"
+                style={{
+                  border: `2px solid ${selectedIndex === idx ? '#C9A84B' : 'rgba(255,255,255,0.06)'}`,
+                  boxShadow: selectedIndex === idx ? '0 0 14px rgba(201,168,75,0.28)' : 'none',
+                }}
               >
                 <img src={`data:image/png;base64,${img}`} alt="" className="w-full h-full object-cover" />
               </button>
@@ -409,28 +457,31 @@ export default function Home() {
         </div>
       )}
 
-      {/* Recent generations */}
+      {/* ── Recent ── */}
       {gallery.length > 0 && !isLoading && images.length === 0 && (
-        <div>
-          <p className="text-xs text-gray-500 mb-2">Recent</p>
+        <div className="mt-5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] mb-3" style={{ color: 'rgba(240,235,224,0.28)' }}>
+            Recent
+          </p>
           {gallery.slice(0, 4).map((item) => (
             <button
               key={item.id}
               onClick={() => { setViewingItem(item); setViewingIndex(0); setTab('gallery'); }}
-              className="w-full flex items-center gap-3 py-3 border-b border-gray-100 text-left"
+              className="w-full flex items-center gap-3 py-3 text-left"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
             >
-              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+              <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ background: '#1A1A1A' }}>
                 <img src={`data:image/png;base64,${item.images[0]}`} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
-                <p className="text-[10px] text-gray-500">{item.outfit.replace(/_/g, ' ')} · {item.scene.replace(/_/g, ' ')}</p>
+                <p className="text-sm font-medium truncate" style={{ color: '#F0EBE0' }}>{item.name}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: 'rgba(240,235,224,0.32)' }}>
+                  {item.outfit.replace(/_/g, ' ')} · {item.scene.replace(/_/g, ' ')}
+                </p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M1 1l5 5-5 5" />
-                </svg>
-              </div>
+              <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="rgba(201,168,75,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 1l5 5-5 5" />
+              </svg>
             </button>
           ))}
         </div>
@@ -442,63 +493,109 @@ export default function Home() {
   // GALLERY SCREEN
   // ═══════════════════════════════════════
   const renderGallery = () => (
-    <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 72px)' }}>
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-1">
-        <h1 className="text-2xl font-bold text-gray-900">Activity</h1>
-        <span className="text-lg">🔥</span>
+    <div className="px-4 pt-4 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 72px)' }}>
+      <div className="flex items-end justify-between mb-5">
+        <div>
+          <h1
+            style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2.2rem', color: '#C9A84B', letterSpacing: '0.1em', lineHeight: 1 }}
+          >
+            ACTIVITY
+          </h1>
+          <p className="text-[9px] font-semibold tracking-[0.3em] uppercase mt-1" style={{ color: 'rgba(240,235,224,0.28)' }}>
+            Past Generations
+          </p>
+        </div>
+        <span className="text-xl">🔥</span>
       </div>
 
-      {/* Viewing detail */}
       {viewingItem ? (
         <div>
           <button
             onClick={() => setViewingItem(null)}
-            className="text-xs text-accent font-semibold mb-4 flex items-center gap-1 py-1"
+            className="flex items-center gap-1.5 text-xs font-semibold mb-4 py-1"
+            style={{ color: '#C9A84B' }}
           >
-            ← Back
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Back
           </button>
 
-          <div className="bg-white rounded-2xl overflow-hidden mb-3 border border-gray-200 shadow-sm">
+          <div
+            className="rounded-2xl overflow-hidden mb-3"
+            style={{ background: '#0C0C0C', border: '1px solid rgba(201,168,75,0.2)', boxShadow: '0 8px 40px rgba(0,0,0,0.5)' }}
+          >
             <div className="relative">
+              <button
+                onClick={() => setViewingIndex(prev => (prev - 1 + viewingItem.images.length) % viewingItem.images.length)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center active:scale-90 transition z-10"
+                style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
               <img
                 src={`data:image/png;base64,${viewingItem.images[viewingIndex]}`}
                 alt={viewingItem.name}
                 className="w-full block"
               />
               <button
-                onClick={() => downloadImage(viewingItem.images[viewingIndex], `flexbot-${viewingItem.name}-${viewingIndex + 1}.png`)}
-                className="absolute bottom-3 right-3 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition"
+                onClick={() => setViewingIndex(prev => (prev + 1) % viewingItem.images.length)}
+                className="absolute top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center active:scale-90 transition z-10"
+                style={{ right: '52px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+              <div
+                className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1"
+                style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)' }}
+              >
+                <span className="text-[10px] font-semibold" style={{ color: '#C9A84B' }}>
+                  {viewingIndex + 1} / {viewingItem.images.length}
+                </span>
+              </div>
+              <button
+                onClick={() => downloadImage(viewingItem.images[viewingIndex], `flexbot-${viewingItem.name}-${viewingIndex + 1}.png`)}
+                className="absolute bottom-3 right-3 w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition"
+                style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
               </button>
             </div>
-            <div className="px-4 py-3 flex items-center justify-between">
+            <div className="px-4 py-3 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <div>
-                <p className="text-sm font-semibold text-gray-900">{viewingItem.name}</p>
-                <p className="text-[10px] text-gray-500">{viewingItem.date}, {viewingItem.time} · {viewingItem.outfit.replace(/_/g, ' ')}</p>
+                <p className="text-sm font-semibold" style={{ color: '#F0EBE0' }}>{viewingItem.name}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: 'rgba(240,235,224,0.38)' }}>
+                  {viewingItem.date}, {viewingItem.time} · {viewingItem.outfit.replace(/_/g, ' ')}
+                </p>
               </div>
               <button
                 onClick={() => deleteGalleryItem(viewingItem.id)}
-                className="text-[10px] text-gray-400 font-medium"
+                className="text-[11px] font-medium"
+                style={{ color: 'rgba(229,57,53,0.65)' }}
               >
                 Delete
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="grid grid-cols-3 gap-2 mb-4">
             {viewingItem.images.map((img, idx) => (
               <button
                 key={idx}
                 onClick={() => setViewingIndex(idx)}
-                className={`aspect-square rounded-xl overflow-hidden border-2 transition ${
-                  viewingIndex === idx ? 'border-accent' : 'border-gray-200'
-                }`}
+                className="aspect-square rounded-xl overflow-hidden transition-all active:scale-95"
+                style={{
+                  border: `2px solid ${viewingIndex === idx ? '#C9A84B' : 'rgba(255,255,255,0.06)'}`,
+                  boxShadow: viewingIndex === idx ? '0 0 14px rgba(201,168,75,0.28)' : 'none',
+                }}
               >
                 <img src={`data:image/png;base64,${img}`} alt="" className="w-full h-full object-cover" />
               </button>
@@ -506,32 +603,28 @@ export default function Home() {
           </div>
 
           <button
-            onClick={() => {
-              viewingItem.images.forEach((img, i) => {
-                setTimeout(() => downloadImage(img, `flexbot-${viewingItem.name}-${i + 1}.png`), i * 300);
-              });
-            }}
-            className="w-full py-3.5 bg-accent text-white text-xs font-bold uppercase tracking-wider rounded-xl active:scale-[0.98] transition"
+            onClick={() => viewingItem.images.forEach((img, i) => setTimeout(() => downloadImage(img, `flexbot-${viewingItem.name}-${i + 1}.png`), i * 300))}
+            className="w-full py-3.5 rounded-xl active:scale-[0.98] transition btn-shimmer relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, #C9A84B 0%, #A07628 100%)', color: '#0A0A0A', fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.95rem', letterSpacing: '0.15em', boxShadow: '0 4px 20px rgba(201,168,75,0.22)' }}
           >
-            Download All Photos
+            Save All Photos
           </button>
         </div>
       ) : (
         <>
-          <p className="text-xs text-gray-400 mb-4">Past</p>
-
           {gallery.length === 0 && (
             <div className="text-center py-20">
-              <div className="text-5xl mb-4 opacity-50">📸</div>
-              <p className="text-sm text-gray-500">No generations yet</p>
-              <p className="text-[10px] text-gray-400 mt-1">Create your first flex on the Home tab</p>
+              <div className="text-5xl mb-4 opacity-20">📸</div>
+              <p className="text-sm font-medium" style={{ color: 'rgba(240,235,224,0.45)' }}>No generations yet</p>
+              <p className="text-[10px] mt-1" style={{ color: 'rgba(240,235,224,0.28)' }}>Create your first flex on the Home tab</p>
             </div>
           )}
 
           {gallery.length > 0 && (
             <button
               onClick={() => { setViewingItem(gallery[0]); setViewingIndex(0); }}
-              className="w-full bg-white rounded-2xl overflow-hidden mb-4 text-left border border-gray-200 shadow-sm active:opacity-90 transition"
+              className="w-full rounded-2xl overflow-hidden mb-4 text-left active:opacity-90 transition"
+              style={{ background: '#0C0C0C', border: '1px solid rgba(201,168,75,0.2)', boxShadow: '0 4px 24px rgba(0,0,0,0.4)' }}
             >
               <div className="relative h-48 overflow-hidden">
                 <img
@@ -539,11 +632,15 @@ export default function Home() {
                   alt={gallery[0].name}
                   className="w-full h-full object-cover"
                 />
-              </div>
-              <div className="px-4 py-3">
-                <p className="text-sm font-semibold text-gray-900">{gallery[0].name}</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">{gallery[0].date}, {gallery[0].time}</p>
-                <p className="text-[10px] text-gray-400">{gallery[0].outfit.replace(/_/g, ' ')} · {gallery[0].scene.replace(/_/g, ' ')}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                <div className="absolute bottom-3 left-4">
+                  <p
+                    style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.4rem', color: '#C9A84B', letterSpacing: '0.08em', lineHeight: 1 }}
+                  >
+                    {gallery[0].name.toUpperCase()}
+                  </p>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{gallery[0].date}, {gallery[0].time}</p>
+                </div>
               </div>
             </button>
           )}
@@ -552,20 +649,21 @@ export default function Home() {
             <button
               key={item.id}
               onClick={() => { setViewingItem(item); setViewingIndex(0); }}
-              className="w-full flex items-center gap-3 py-3.5 border-b border-gray-100 text-left active:opacity-70 transition"
+              className="w-full flex items-center gap-3 py-3.5 text-left active:opacity-70 transition"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
             >
-              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+              <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ background: '#1A1A1A' }}>
                 <img src={`data:image/png;base64,${item.images[0]}`} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                <p className="text-[10px] text-gray-500">
-                  {item.date}, {item.time}
-                </p>
-                <p className="text-[10px] text-gray-400">{item.outfit.replace(/_/g, ' ')}</p>
+                <p className="text-sm font-medium truncate" style={{ color: '#F0EBE0' }}>{item.name}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: 'rgba(240,235,224,0.38)' }}>{item.date} · {item.outfit.replace(/_/g, ' ')}</p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
-                <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(201,168,75,0.1)', border: '1px solid rgba(201,168,75,0.18)' }}
+              >
+                <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="#C9A84B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 1l5 5-5 5" />
                 </svg>
               </div>
@@ -580,53 +678,59 @@ export default function Home() {
   // PROFILE SCREEN
   // ═══════════════════════════════════════
   const renderProfile = () => (
-    <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 72px)' }}>
-      {/* Greeting + Avatar */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="px-4 pt-4 pb-4 overflow-y-auto" style={{ height: 'calc(100vh - 72px)' }}>
+      <div className="flex items-center justify-between mb-7">
         <div>
-          <p className="text-xl font-bold text-gray-900">Hi there 👋</p>
-          <p className="text-sm text-gray-500">Premeditated Millionaire</p>
+          <h1
+            style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', color: '#C9A84B', letterSpacing: '0.1em', lineHeight: 1 }}
+          >
+            PREMEDITATED
+          </h1>
+          <p className="text-[9px] font-semibold tracking-[0.3em] uppercase mt-1" style={{ color: 'rgba(240,235,224,0.28)' }}>
+            Millionaire
+          </p>
         </div>
-        <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center border-2 border-gray-200">
-          <span className="text-2xl">💰</span>
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center text-2xl"
+          style={{ background: 'rgba(201,168,75,0.09)', border: '1px solid rgba(201,168,75,0.22)' }}
+        >
+          💰
         </div>
       </div>
 
-      {/* 3 Action buttons */}
       <div className="grid grid-cols-3 gap-3 mb-8">
-        <button
+        <ProfileAction
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />
+            </svg>
+          }
+          label="Gallery"
           onClick={() => setTab('gallery')}
-          className="bg-gray-50 rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-gray-200 shadow-sm active:opacity-80 transition"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="7" height="7" />
-            <rect x="14" y="3" width="7" height="7" />
-            <rect x="14" y="14" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" />
-          </svg>
-          <span className="text-[11px] font-semibold text-gray-900">Gallery</span>
-        </button>
-        <button className="bg-gray-50 rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-gray-200 shadow-sm active:opacity-80 transition">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          <span className="text-[11px] font-semibold text-gray-900">Downloads</span>
-        </button>
-        <button
+        />
+        <ProfileAction
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          }
+          label="Downloads"
+          onClick={() => {}}
+        />
+        <ProfileAction
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+          }
+          label="Generate"
           onClick={() => setTab('home')}
-          className="bg-gray-50 rounded-2xl py-5 flex flex-col items-center gap-2.5 border border-gray-200 shadow-sm active:opacity-80 transition"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-          </svg>
-          <span className="text-[11px] font-semibold text-gray-900">Generate</span>
-        </button>
+        />
       </div>
 
-      {/* Menu items */}
-      <div className="space-y-0">
+      <div>
         <MenuRow icon="📊" label="Stats" value={`${totalGenerated} images`} />
         <MenuRow icon="⚙️" label="Settings" />
         <MenuRow icon="📤" label="Share FlexBot" />
@@ -635,13 +739,13 @@ export default function Home() {
       </div>
 
       <div className="mt-8 text-right">
-        <p className="text-[10px] text-gray-400">v2.0.0</p>
+        <p className="text-[10px]" style={{ color: 'rgba(240,235,224,0.18)' }}>v2.0.0</p>
       </div>
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white relative max-w-md mx-auto">
+    <main className="min-h-screen relative max-w-md mx-auto" style={{ background: '#070707' }}>
       <div className="pt-safe">
         {tab === 'home' && renderHome()}
         {tab === 'gallery' && renderGallery()}
@@ -650,14 +754,21 @@ export default function Home() {
 
       {/* ─── Bottom Navigation ─── */}
       <nav className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="max-w-md mx-auto bg-white/95 backdrop-blur-xl border-t border-gray-200">
+        <div
+          className="max-w-md mx-auto backdrop-blur-xl"
+          style={{ background: 'rgba(7,7,7,0.97)', borderTop: '1px solid rgba(255,255,255,0.055)' }}
+        >
           <div className="flex justify-around items-center h-[72px] pb-safe">
             <BottomTab
               active={tab === 'home'}
               label="Home"
               onClick={() => setTab('home')}
               icon={
-                <svg width="22" height="22" viewBox="0 0 24 24" fill={tab === 'home' ? '#E53935' : 'none'} stroke={tab === 'home' ? '#E53935' : '#aaa'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24"
+                  fill={tab === 'home' ? 'rgba(201,168,75,0.12)' : 'none'}
+                  stroke={tab === 'home' ? '#C9A84B' : 'rgba(240,235,224,0.28)'}
+                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+                >
                   <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                   <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
@@ -668,7 +779,10 @@ export default function Home() {
               label="Activity"
               onClick={() => { setTab('gallery'); setViewingItem(null); }}
               icon={
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab === 'gallery' ? '#E53935' : '#aaa'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke={tab === 'gallery' ? '#C9A84B' : 'rgba(240,235,224,0.28)'}
+                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+                >
                   <rect x="3" y="3" width="7" height="7" rx="1" />
                   <rect x="14" y="3" width="7" height="7" rx="1" />
                   <rect x="14" y="14" width="7" height="7" rx="1" />
@@ -681,7 +795,10 @@ export default function Home() {
               label="Profile"
               onClick={() => setTab('profile')}
               icon={
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={tab === 'profile' ? '#E53935' : '#aaa'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke={tab === 'profile' ? '#C9A84B' : 'rgba(240,235,224,0.28)'}
+                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+                >
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
@@ -700,10 +817,15 @@ function BottomTab({ icon, label, active, onClick }: { icon: React.ReactNode; la
   return (
     <button onClick={onClick} className="flex flex-col items-center gap-0.5 py-1 px-5 transition active:opacity-70 relative">
       {active && (
-        <span className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-accent" />
+        <span
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full"
+          style={{ background: 'linear-gradient(90deg, #C9A84B, #E8C96A)' }}
+        />
       )}
       {icon}
-      <span className={`text-[10px] font-medium ${active ? 'text-accent' : 'text-gray-400'}`}>{label}</span>
+      <span className="text-[10px] font-medium" style={{ color: active ? '#C9A84B' : 'rgba(240,235,224,0.3)' }}>
+        {label}
+      </span>
     </button>
   );
 }
@@ -713,9 +835,12 @@ function PillPicker({ options, value, onChange }: { options: string[]; value: st
     <div className="pill-scroll">
       <button
         onClick={() => onChange('')}
-        className={`flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border transition whitespace-nowrap ${
-          value === '' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200'
-        }`}
+        className="flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold transition whitespace-nowrap"
+        style={{
+          background: value === '' ? '#C9A84B' : 'rgba(255,255,255,0.04)',
+          color: value === '' ? '#0A0A0A' : 'rgba(240,235,224,0.5)',
+          border: `1px solid ${value === '' ? '#C9A84B' : 'rgba(255,255,255,0.08)'}`,
+        }}
       >
         Random
       </button>
@@ -723,9 +848,12 @@ function PillPicker({ options, value, onChange }: { options: string[]; value: st
         <button
           key={key}
           onClick={() => onChange(key)}
-          className={`flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border transition whitespace-nowrap ${
-            value === key ? 'bg-accent text-white border-accent' : 'bg-white text-gray-700 border-gray-200'
-          }`}
+          className="flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold transition whitespace-nowrap"
+          style={{
+            background: value === key ? '#C9A84B' : 'rgba(255,255,255,0.04)',
+            color: value === key ? '#0A0A0A' : 'rgba(240,235,224,0.5)',
+            border: `1px solid ${value === key ? '#C9A84B' : 'rgba(255,255,255,0.08)'}`,
+          }}
         >
           {key.replace(/_/g, ' ')}
         </button>
@@ -736,19 +864,32 @@ function PillPicker({ options, value, onChange }: { options: string[]; value: st
 
 function MenuRow({ icon, label, value }: { icon: string; label: string; value?: string }) {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-gray-100">
+    <div className="flex items-center justify-between py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
       <div className="flex items-center gap-3">
         <span className="text-base">{icon}</span>
-        <span className="text-sm font-medium text-gray-900">{label}</span>
+        <span className="text-sm font-medium" style={{ color: '#F0EBE0' }}>{label}</span>
       </div>
       <div className="flex items-center gap-2">
-        {value && <span className="text-[10px] text-gray-400">{value}</span>}
-        <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
-          <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="#bbb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        {value && <span className="text-[10px]" style={{ color: '#C9A84B' }}>{value}</span>}
+        <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.055)' }}>
+          <svg width="6" height="10" viewBox="0 0 7 12" fill="none" stroke="rgba(240,235,224,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 1l5 5-5 5" />
           </svg>
         </div>
       </div>
     </div>
+  );
+}
+
+function ProfileAction({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded-2xl py-5 flex flex-col items-center gap-2.5 active:opacity-75 transition"
+      style={{ background: '#0C0C0C', border: '1px solid rgba(201,168,75,0.14)' }}
+    >
+      {icon}
+      <span className="text-[11px] font-semibold" style={{ color: 'rgba(240,235,224,0.75)' }}>{label}</span>
+    </button>
   );
 }
